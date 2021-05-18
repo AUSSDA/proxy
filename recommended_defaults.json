@@ -1,0 +1,21 @@
+{
+  "/codeBook/stdyDscr/citation/rspStmt/AuthEnty": "",
+  "/codeBook/stdyDscr/stdyInfo/subject/keyword": "",
+  "/codeBook/stdyDscr/stdyInfo/subject/keyword/@vocab": "",
+  "/codeBook/stdyDscr/stdyInfo/subject/topcClas": "",
+  "/codeBook/stdyDscr/stdyInfo/subject/topcClas/@vocab": "",
+  "/codeBook/stdyDscr/stdyInfo/subject/topcClas/@vocabURI": "",
+  "/codeBook/stdyDscr/stdyInfo/sumDscr/collDate/@date": "",
+  "/codeBook/stdyDscr/stdyInfo/sumDscr/nation": "",
+  "/codeBook/stdyDscr/stdyInfo/sumDscr/nation/@abbr": "",
+  "/codeBook/stdyDscr/stdyInfo/sumDscr/anlyUnit": "",
+  "/codeBook/stdyDscr/stdyInfo/sumDscr/anlyUnit/concept": "",
+  "/codeBook/stdyDscr/stdyInfo/sumDscr/anlyUnit/concept/@vocab": "",
+  "/codeBook/stdyDscr/method/dataColl/timeMeth": "",
+  "/codeBook/stdyDscr/method/dataColl/timeMeth/concept/@vocab": "",
+  "/codeBook/stdyDscr/method/dataColl/sampProc/concept/@vocab": "",
+  "/codeBook/stdyDscr/method/dataColl/collMode": "",
+  "/codeBook/stdyDscr/method/dataColl/collMode/concept/@vocab": "",
+  "/codeBook/stdyDscr/dataAccs/useStmt/restrctn": "",
+  "/codeBook/fileDscr/fileTxt/fileName": ""
+}
