@@ -1,5 +1,7 @@
 """
-Util functions
+Util functions.
+
+Mainly to generate the _default.json files. Run this as script.
 """
 
 import sys
@@ -11,7 +13,7 @@ from lxml import etree
 
 
 def gen_rules(
-    constraint: str = "Mandatory", profile: str = "cdc25_profile_mono.xml"
+    constraint: str = "Mandatory", profile: str = "assets/cdc25_profile_mono.xml"
 ) -> None:
     """
     Generator yielding all xpaths for specified constraint.
@@ -47,7 +49,7 @@ def gen_rules(
 
 
 def gen_rules_defaults(
-    constraint: str = "Mandatory", profile: str = "cdc25_profile_mono.xml"
+    constraint: str = "Mandatory", profile: str = "assets/cdc25_profile_mono.xml"
 ) -> None:
     """
     Saves a json to the local filesystem
@@ -57,7 +59,7 @@ def gen_rules_defaults(
     for rule in gen_rules(constraint, profile):
         data[rule] = ""
 
-    filename = f"{constraint.lower()}_defaults.json"
+    filename = f"assets/{constraint.lower()}_defaults.json"
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=2)
 
@@ -66,8 +68,8 @@ def main(args) -> None:
     p = argparse.ArgumentParser(
         description="Creates a json file for each field/attribute per constraint level"
     )
-    p.add_argument("-c", "--constraint", type=str)
-    p.add_argument("-p", "--profile", type=str)
+    p.add_argument("-c", "--constraint", type=str, default="Mandatory")
+    p.add_argument("-p", "--profile", type=str, default="assets/cdc25_profile_mono.xml")
     args = p.parse_args()
 
     gen_rules_defaults(constraint=args.constraint, profile=args.profile)

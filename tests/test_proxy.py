@@ -1,23 +1,20 @@
 """
-Testing of format.py functions.
+Testing of proxy.py functions.
 """
 
 import proxy
 import utils
 import pytest
+import requests
 
-HOSTNAME = "https://data.aussda.at"
-TEST_DATASET = "doi:10.11587/BQVSOW"
+@pytest.fixture
+def oai_ddi_test_file():
+    test_dataset = "doi:10.11587/BQVSOW"
+    return f"oai?verb=GetRecord&metadataPrefix=oai_ddi&identifier={test_dataset}"
 
-# @pytest.fixture
-def oai_ddi_file():
-    from pyDataverse.api import NativeApi
-
-    api = NativeApi(base_url=HOSTNAME)
-
-    resp = api.get_dataset_export(pid=TEST_DATASET, export_format="oai_ddi")
-    assert resp.status_code == 200
-
+@pytest.fixture
+def validate_cessda():
+    pass
 
 def test_yield_num_mandatory_rules_mono():
     from collections import Counter
@@ -40,6 +37,13 @@ def test_yield_num_mandatory_rules():
     assert len(rules) == 22
 
 
-def test_oai_only_valid():
+def test_invalid_url():
     url = "api/access/datafile/216/metadata/ddi"
     assert proxy.place_request(url, None) == None
+
+
+def test_valid_url():
+    assert proxy.place_request(oai_ddi_test_file, None) == None
+
+def test_valid_formatting():
+    pass

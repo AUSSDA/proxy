@@ -1,9 +1,11 @@
 """
-ToDo
-- Description
+Contact:  info@aussda.at
 
-Only been tested with Dataverse 4.20.
+This is a small flask application that serves as reverse proxy and acts
+as man-in-the-middle. It passes a request to Dataverse's OAI endpoint, and
+adds all deafault values from the _defaults.json files.
 
+Tested only with Dataverse 4.20.
 """
 
 # ------------------------------------------------------------------------- #
@@ -12,6 +14,7 @@ Only been tested with Dataverse 4.20.
 
 import requests
 import os
+import sys
 import json
 import logging
 
@@ -26,24 +29,34 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.DEBUG)
 
-NSMAP = {"xlmns": "http://www.openarchives.org/OAI/2.0/", "ddi": "ddi:codebook:2_5"}
 HOSTNAME = "https://data.aussda.at"
 CONSTRAINT_LEVEL = "mandatory"  # mandatory, optional, recommended
+NSMAP = {
+    "xlmns": "http://www.openarchives.org/OAI/2.0/",
+    "ddi": "ddi:codebook:2_5",
+    "xml": "http://www.w3.org/XML/1998/namespace",
+    "xsi": "http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd",
+}
 
 # ------------------------------------------------------------------------- #
 # Util functions
 # ------------------------------------------------------------------------- #
 
+
 def read_json_file(filename):
-    with open(filename, encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with open(filename, encoding="utf-8") as file:
+            return json.load(file)
+    except:
+        print("Warning - file with default values not found. Check utils.py")
+        sys.exit(1)
 
 
 def pretty_xml(xml, indent=False):
     return etree.tostring(xml, pretty_print=indent, encoding=str)
 
 
-def save_xml(xml, filename, indent):
+def save_xml(xml, filename, indent=True):
     with open(filename, "w") as f:
         f.write(pretty_xml(xml, indent))
 
@@ -69,7 +82,6 @@ def place_request(path: str, query: str) -> str:
     app.logger.info(f"Successfully placed proxied request to '{url}'")
     # Modify xml for compliance
     req_format = format_metadata(req_raw)
-
     return req_format
 
 
@@ -81,7 +93,7 @@ def format_metadata(req_raw) -> str:
         load_dtd=True,
         attribute_defaults=True,
         ns_clean=True,
-        encoding="utf-8"
+        encoding="utf-8",
     )
     app.logger.debug(f"Parsing response {req_raw.content}")
     xml = etree.XML(req_raw.content, parser=xml_parser)
@@ -94,19 +106,23 @@ def format_metadata(req_raw) -> str:
     defaults = read_json_file(filename)
 
     # ToDo: Exception handling with XPathEvalError and XPathSyntaxError
-    # Iterate over paths and set default values
-    for path, value in defaults.items():
-        app.logger.info(f"Ensuring rule '{path}'")
-        path = gen_metadata_xpath(path)
+    # Iterate over paths and set default values if no value present
+    for rule, value in defaults.items():
+        path, attrib, ns = None, None, None
 
+        app.logger.info(f"Ensuring rule '{path}'")
+        path = gen_metadata_xpath(rule)
         if "@" in path:
             # Attribute rule
             path, attrib = path.split("@")
+            if ":" in attrib:
+                # Attribute rule with namespace
+                ns, attrib = attrib.split(":")
 
             # Remove trailing slash for xpath
             path = path[:-1] if path[-1] == "/" else path
 
-            # Get first element at rule
+            # Get first element matching path
             app.logger.debug(f"Querying path '{path}'")
             el = metadata.xpath(path, namespaces=NSMAP)
             if len(el) == 0:
@@ -115,15 +131,17 @@ def format_metadata(req_raw) -> str:
                 app.logger.debug(f"Got element {el[0]}")
                 el = el[0]
 
-            # Remove namespace from attrib if exists
-            if ":" in attrib:
-                _, attrib = attrib.split(":")
-
-            # Set attribute with default value
-            app.logger.info(f"Setting attribute '{attrib}' to default '{value}'")
-            el.set(attrib, value)
+            app.logger.debug(f"Attributes at element are {el.attrib.keys()}")
+            attrib_exists = any([attrib in a for a in el.attrib.keys()])
+            if not attrib_exists:
+                # Add namespace to attrib if needed
+                if ns is not None:
+                    attrib = "{" + NSMAP[ns] + "}" + attrib
+                # Set attribute with default value
+                app.logger.info(f"Setting attribute '{attrib}' to default '{value}'")
+                el.set(attrib, value)
         else:
-            # check if element present
+            # Element rule
             el = metadata.xpath(path, namespaces=NSMAP)
             if len(el) == 0:
                 app.logger.debug(f"Path not found, adding")
@@ -137,7 +155,40 @@ def format_metadata(req_raw) -> str:
                 app.logger.info(f"Setting text to {value}")
                 el.text = value
 
+    # Special case
+    # I think that the harvester will
+
     return pretty_xml(xml, indent=True)
+
+
+def gen_metadata_xpath(path: str):
+    # Only add namespce after /codebook/
+    _, item = path.split("/codeBook")
+
+    # Seperate attribute from path
+    if "@" in item:
+        p, attrib = item.split("/@")
+    else:
+        p = item
+
+    # Modify only if path is not just /codeBook/
+    if len(p) > 1:
+        p = [f"ddi:{i}" for i in p.split("/")[1:]]
+        p = "/".join([i for i in p])
+
+    # Merge together
+    if "@" in item:
+        if len(p) > 1:
+            full = "//ddi:codeBook/" + p + "/@" + attrib
+        else:
+            # Edge case at root of /codeBook/
+            full = "//ddi:codeBook/" + "@" + attrib
+    else:
+        full = "//ddi:codeBook/" + p
+
+    # Return without whitespaces
+    return full.strip()
+
 
 def add_element_xpath(metadata: etree._Element, path: str):
     # Assume last piece of path is not found
@@ -149,33 +200,6 @@ def add_element_xpath(metadata: etree._Element, path: str):
     app.logger.debug(f"Added element {new}")
     return new
 
-def gen_metadata_xpath(path: str):
-    # Only add namespce after /codebook/
-    _, item = path.split("/codeBook")
-
-   # Seperate attribute from path
-    if "@" in item:
-        p, attrib = item.split("/@")
-    else:
-        p = item
-
-   # Modify only if path is not just /codeBook/
-    if len(p) > 1:
-        p = [f"ddi:{i}" for i in p.split("/")[1:]]
-        p = "/".join([i for i in p])
-
-   # Merge together
-    if "@" in item:
-        if len(p) > 1:
-            full = "//ddi:codeBook/" + p + "/@" + attrib
-        else:
-            # Edge case at root of /codeBook/
-            full ="//ddi:codeBook/" + "@" + attrib
-    else:
-        full = "//ddi:codeBook/" + p
-
-    # Return without whitespaces
-    return full.strip()
 
 # ------------------------------------------------------------------------- #
 # Web APIs
@@ -208,5 +232,6 @@ def proxy(path):
 # ------------------------------------------------------------------------- #
 
 if __name__ == "__main__":
+    # WARNING: DO NOT RUN IN PRODUCTION.
     port = int(os.environ.get("PORT", 8081))
     app.run(host="0.0.0.0", port=port)

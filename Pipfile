@@ -4,10 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-jupyter = "*"
-flask = "*"
+flask = "2.0.0"
+lxml = "4.6.3"
+requests = "2.25.1"
 
 [dev-packages]
+jupyter = "*"
+pytest = "6.2.4"
+black = "21.5b1"
 
 [requires]
 python_version = "3.9"
