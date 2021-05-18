@@ -40,7 +40,7 @@ def read_json_file(filename):
 
 
 def pretty_xml(xml, indent=False):
-    return etree.tostring(xml, pretty_print=indent, encoding="UTF-8").decode()
+    return etree.tostring(xml, pretty_print=indent, encoding=str)
 
 
 def save_xml(xml, filename, indent):
@@ -69,6 +69,7 @@ def place_request(path: str, query: str) -> str:
     app.logger.info(f"Successfully placed proxied request to '{url}'")
     # Modify xml for compliance
     req_format = format_metadata(req_raw)
+
     return req_format
 
 
@@ -80,7 +81,7 @@ def format_metadata(req_raw) -> str:
         load_dtd=True,
         attribute_defaults=True,
         ns_clean=True,
-        encoding="UTF-8"
+        encoding="utf-8"
     )
     app.logger.debug(f"Parsing response {req_raw.content}")
     xml = etree.XML(req_raw.content, parser=xml_parser)
@@ -95,7 +96,7 @@ def format_metadata(req_raw) -> str:
     # ToDo: Exception handling with XPathEvalError and XPathSyntaxError
     # Iterate over paths and set default values
     for path, value in defaults.items():
-        app.logger.info(f"Ensuring rule '{path}' with value '{value}'")
+        app.logger.info(f"Ensuring rule '{path}'")
         path = gen_metadata_xpath(path)
 
         if "@" in path:
@@ -109,10 +110,9 @@ def format_metadata(req_raw) -> str:
             app.logger.debug(f"Querying path '{path}'")
             el = metadata.xpath(path, namespaces=NSMAP)
             if len(el) == 0:
-                app.logger.debug(f"Path not found, adding.")
                 el = add_element_xpath(metadata, path)
             else:
-                app.logger.debug(f"Found path. Got element {el[0]}")
+                app.logger.debug(f"Got element {el[0]}")
                 el = el[0]
 
             # Remove namespace from attrib if exists
@@ -134,6 +134,7 @@ def format_metadata(req_raw) -> str:
 
             # Keep text if exist, otherwise use default
             if len(el.text) == 0:
+                app.logger.info(f"Setting text to {value}")
                 el.text = value
 
     return pretty_xml(xml, indent=True)
@@ -198,7 +199,7 @@ def proxy(path):
         resp = make_response("<p>ERROR - Please contact info@aussda.at</p>", 500)
     else:
         resp = make_response(valid_file)
-        resp.headers["Content-Type"] = "text/xml;charset=UTF-8"
+        resp.headers["Content-Type"] = "text/xml;charset=utf-8"
     return resp
 
 
