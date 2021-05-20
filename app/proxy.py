@@ -71,7 +71,7 @@ def save_xml(xml, filename, indent=True):
 def place_request(path: str, query: str) -> str:
     # Allow only to reach the OAI-MPH endpoint
     if not path == "oai":
-        app.loggger.warning("Invalid endpoint")
+        app.logger.warning("Invalid endpoint")
         return None
 
     # Generate url and place request
