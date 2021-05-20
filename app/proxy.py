@@ -29,7 +29,7 @@ from lxml import etree
 
 app = Flask(__name__)
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 HOSTNAME = "https://data.aussda.at"
 CONSTRAINT_LEVEL = "mandatory"  # mandatory, optional, recommended
