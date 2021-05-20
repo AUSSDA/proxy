@@ -10,8 +10,11 @@ requests = "2.25.1"
 
 [dev-packages]
 jupyter = "*"
-pytest = "6.2.4"
-black = "21.5b1"
+pytest = "*"
+black = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true

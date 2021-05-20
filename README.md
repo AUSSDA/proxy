@@ -2,10 +2,11 @@
 
 A small man-in-the-middle script for Dataverse 4.20.
 
-It acts as mediator between requests send by a harvesting client, such as CESSDA's Data Catalogue, and Dataver'ses OAI-MPH endpoint.
+It acts as mediator between requests send by a harvesting client, such as CESSDA's Data Catalogue, and
+Dataverse's OAI-MPH endpoint.
 
-This solves the problem of some missing elements in Dataverse's OAI-MPH exports, and enables compliance with the
-DDI profile set out by CESSDA.
+This solves the problem of some missing elements in Dataverse's OAI-MPH exports, and enables compliance
+with the DDI profile set out by CESSDA.
 
 Fundamentally, the proxy validates the pressence of paths or attributes defined in the `assets/*_defaults.json` files. You can set the default values to whatever seems appropriate.
 
@@ -26,9 +27,11 @@ that this script has only been tested with Dataverse 4.20. You should have a run
     ``` bash
      pip3 install flask
     ```
-3. Clone this repo. We recommend putting it into `/var/www`. If you do not want to put it there, you will need to edit `app/apache.wsgi`
+3. Clone this repo. We recommend putting it into `/var/www`. If you do not want to put it there, you will need to edit `app/apache.wsgi`. You will also need to install all requirements.
    ``` bash
      git clone https://github.com/aussda/proxy /var/www/proxy
+     cd /var/www/proxy
+     pip3 install -r requirements.txt
    ```
 4. Create a new site in Apache
    ``` bash
