@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Util functions.
 
@@ -69,7 +71,7 @@ def main(args) -> None:
         description="Creates a json file for each field/attribute per constraint level"
     )
     p.add_argument("-c", "--constraint", type=str, default="Mandatory")
-    p.add_argument("-p", "--profile", type=str, default="assets/cdc25_profile_mono.xml")
+    p.add_argument("-p", "--profile", type=str, default="../assets/cdc25_profile_mono.xml")
     args = p.parse_args()
 
     gen_rules_defaults(constraint=args.constraint, profile=args.profile)

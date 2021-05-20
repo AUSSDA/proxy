@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Contact:  info@aussda.at
 
