@@ -157,9 +157,6 @@ def format_metadata(req_raw) -> str:
                 app.logger.info(f"Setting text to {value}")
                 el.text = value
 
-    # Special case
-    # I think that the harvester will
-
     return pretty_xml(xml, indent=True)
 
 
