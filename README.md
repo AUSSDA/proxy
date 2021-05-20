@@ -23,21 +23,17 @@ that this script has only been tested with Dataverse 4.20. You should have a run
     ``` bash
      sudo apt-get install libapache2-mod-wsgi-py3 python3
     ```
-2. Install `flask`
-    ``` bash
-     pip3 install flask
-    ```
-3. Clone this repo. We recommend putting it into `/var/www`. If you do not want to put it there, you will need to edit `app/apache.wsgi`. You will also need to install all requirements.
+2. Clone this repo. We recommend putting it into `/var/www`. If you do not want to put it there, you will need to edit `app/apache.wsgi`. You will also need to install all requirements.
    ``` bash
      git clone https://github.com/aussda/proxy /var/www/proxy
      cd /var/www/proxy
      pip3 install -r requirements.txt
    ```
-4. Create a new site in Apache
+3. Create a new site in Apache
    ``` bash
     sudo nano /etc/apache2/sites-available/proxy.conf
    ```
-5. Edit the following example config and paste it into the config file created in step 4.
+4. Edit the following example config and paste it into the config file created the last step.
     ```
     <VirtualHost *:80>
             ServerName proxy.aussda.at
