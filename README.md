@@ -23,11 +23,12 @@ that this script has only been tested with Dataverse 4.20. You should have a run
     ``` bash
      sudo apt-get install libapache2-mod-wsgi-py3 python3 python3-pip
     ```
-2. Clone this repo. We recommend putting it into `/var/www`. If you do not want to put it there, you will need to edit `app/apache.wsgi`. You will also need to install all requirements.
+2. Clone this repo and install the app. We recommend putting it into `/var/www`. If you do not want to put it there, you will need to edit `app/apache.wsgi`. You will also need to install all requirements.
    ``` bash
      git clone https://github.com/aussda/proxy /var/www/proxy
      cd /var/www/proxy
      pip3 install -r requirements.txt
+     pip3 install -e .
    ```
 3. Create a new site in Apache
    ``` bash
