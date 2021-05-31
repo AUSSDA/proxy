@@ -103,7 +103,8 @@ def format_metadata(req_raw) -> str:
     app.logger.debug(f"Parsed XML: {pretty_xml(xml)}")
 
     # Get default values with CONSTRAINT_LEVEL
-    filename = f"assets/{CONSTRAINT_LEVEL}_defaults.json"
+    root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+    filename = os.path.join(root_path, f"assets/{CONSTRAINT_LEVEL}_defaults.json")
     app.logger.debug(f"Reading rules file {filename}")
     defaults = read_json_file(filename)
 
