@@ -23,12 +23,13 @@ that this script has only been tested with Dataverse 4.20. You should have a run
     ``` bash
      sudo apt-get install libapache2-mod-wsgi-py3 python3 python3-pip
     ```
-2. Clone this repo and install the app. We recommend putting it into `/var/www`. If you do not want to put it there, you will need to edit `app/apache.wsgi`. You will also need to install all requirements.
+2. Clone this repo and install the app. Copy the `app/apache.wsgi` script to `/var/www/proxy`. 
    ``` bash
-     git clone https://github.com/aussda/proxy /var/www/proxy
-     cd /var/www/proxy
-     pip3 install -r requirements.txt
+     git clone https://github.com/aussda/proxy /opt/data/localhost/proxy
+     cd /opt/data/localhost/proxy
      pip3 install -e .
+     mkdir /var/www/proxy
+     cp /opt/data/localhost/proxy/app/apache.wsgi /var/www/proxy
    ```
 3. Create a new site in Apache
    ``` bash
@@ -39,7 +40,7 @@ that this script has only been tested with Dataverse 4.20. You should have a run
     <VirtualHost *:80>
             ServerName proxy.aussda.at
             ServerAdmin info@aussda.at
-            WSGIScriptAlias / /var/www/proxy/app/apache.wsgi
+            WSGIScriptAlias / /var/www/proxy/apache.wsgi
             LogLevel warn
             ErrorLog ${APACHE_LOG_DIR}/proxy-error.log
             CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
@@ -47,7 +48,7 @@ that this script has only been tested with Dataverse 4.20. You should have a run
     <VirtualHost *:443>
             ServerName proxy.aussda.at
             ServerAdmin info@aussda.at
-            WSGIScriptAlias / /var/www/proxy/app/apache.wsgi
+            WSGIScriptAlias / /var/www/proxy/apache.wsgi
             LogLevel warn
             ErrorLog ${APACHE_LOG_DIR}/proxy-error.log
             CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
