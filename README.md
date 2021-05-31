@@ -52,6 +52,11 @@ that this script has only been tested with Dataverse 4.20. You should have a run
             CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
     </VirtualHost>
     ```
+5. Enable the site and reload apache
+    ``` bash
+        sudo a2ensite proxy
+        sudo service apache2 reload
+    ```
 
 Contact
 -------
