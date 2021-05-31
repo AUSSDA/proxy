@@ -21,7 +21,7 @@ that this script has only been tested with Dataverse 4.20. You should have a run
 1. Install `mod_wsgi`
 
     ``` bash
-     sudo apt-get install libapache2-mod-wsgi-py3 python3
+     sudo apt-get install libapache2-mod-wsgi-py3 python3 python3-pip
     ```
 2. Clone this repo. We recommend putting it into `/var/www`. If you do not want to put it there, you will need to edit `app/apache.wsgi`. You will also need to install all requirements.
    ``` bash
