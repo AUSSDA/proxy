@@ -29,9 +29,9 @@ from lxml import etree
 
 app = Flask(__name__)
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 
-HOSTNAME = "https://data.aussda.at"
+HOSTNAME = "https://localhost:8080"  # default for glassfish
 CONSTRAINT_LEVEL = "mandatory"  # mandatory, optional, recommended
 NSMAP = {
     "xlmns": "http://www.openarchives.org/OAI/2.0/",
@@ -77,6 +77,7 @@ def place_request(path: str, query: str) -> str:
     # Generate url and place request
     url = f"{HOSTNAME}/{path}?{query}"
     try:
+        app.logger.info(f"Placing request to {url}")
         req_raw = requests.get(url)
     except:
         app.logger.warning("Request could not be placed")
@@ -102,9 +103,9 @@ def format_metadata(req_raw) -> str:
     metadata = xml.xpath("//xlmns:metadata", namespaces=NSMAP)[0]
     app.logger.debug(f"Parsed XML: {pretty_xml(xml)}")
 
-    # Get default values with CONSTRAINT_LEVEL
+    # Get default values with CONSTRAINT_LEVEL from data_file location in .cfg
     root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    filename = os.path.join(root_path, f"assets/{CONSTRAINT_LEVEL}_defaults.json")
+    filename = os.path.join(root_path, f"proxy/assets/{CONSTRAINT_LEVEL}_defaults.json")
     app.logger.debug(f"Reading rules file {filename}")
     defaults = read_json_file(filename)
 

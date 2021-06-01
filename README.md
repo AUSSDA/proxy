@@ -27,8 +27,7 @@ We also provide a a small script `app/utils.py` that generates these files based
 Installation
 ------------
 
-We assume you have a running Dataverse installation. Be aware
-that this script has only been tested with Dataverse 4.20. You should have a running Apache server.
+We assume you have a running Dataverse 4.20. installation and that you should have a running Apache server.
 
 1. Install `mod_wsgi`
 
@@ -38,14 +37,22 @@ that this script has only been tested with Dataverse 4.20. You should have a run
 2. Clone this repo and install the app. We recommend putting it into `/var/www`
    ``` bash
      git clone https://github.com/aussda/proxy /var/www/
-     cd /var/www/
-     pip3 install -e .
    ```
-3. Create a new site in Apache
+3. Modify defaults to to whatever seems appropriate.
+    ``` bash
+        sudo nano /var/www/proxy/assets/mandatory_defaults.json
+        # or
+        sudo nano /var/www/proxy/assets/recommended_defaults.json
+        # or
+        sudo nano /var/www/proxy/assets/optional_defaults.json
+        # finally set level in
+        sudo nano /var/www/proxy/app/proxy.py
+    ```
+4. Create a new site in Apache
    ``` bash
     sudo nano /etc/apache2/sites-available/proxy.conf
    ```
-4. Edit the following example config and paste it into the config file created the last step.
+5. Edit the following example config and paste it into the config file created the last step.
     ```
     <VirtualHost *:80>
             ServerName proxy.aussda.at
@@ -64,7 +71,7 @@ that this script has only been tested with Dataverse 4.20. You should have a run
             CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
     </VirtualHost>
     ```
-5. Enable the site and reload apache
+6. Enable the site and reload apache
     ``` bash
         sudo a2ensite proxy
         sudo service apache2 reload
