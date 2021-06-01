@@ -40,19 +40,24 @@ We assume you have a running Dataverse 4.20. installation and that you should ha
    ```
 3. Modify defaults to to whatever seems appropriate.
     ``` bash
-        sudo nano /var/www/proxy/assets/mandatory_defaults.json
-        # or
-        sudo nano /var/www/proxy/assets/recommended_defaults.json
-        # or
-        sudo nano /var/www/proxy/assets/optional_defaults.json
-        # finally set level in
-        sudo nano /var/www/proxy/app/proxy.py
+     sudo nano /var/www/proxy/assets/mandatory_defaults.json
+     # or
+     sudo nano /var/www/proxy/assets/recommended_defaults.json
+     # or
+     sudo nano /var/www/proxy/assets/optional_defaults.json
+     # finally set level in
+     sudo nano /var/www/proxy/app/proxy.py
     ```
-4. Create a new site in Apache
+5. Install package to system
+    ``` bash
+     cd /var/www/proxy
+     pip3 install --system .
+    ```
+6. Create a new site in Apache
    ``` bash
     sudo nano /etc/apache2/sites-available/proxy.conf
    ```
-5. Edit the following example config and paste it into the config file created the last step.
+7. Edit the following example config and paste it into the config file created the last step.
     ```
     <VirtualHost *:80>
             ServerName proxy.aussda.at
@@ -71,7 +76,7 @@ We assume you have a running Dataverse 4.20. installation and that you should ha
             CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
     </VirtualHost>
     ```
-6. Enable the site and reload apache
+8. Enable the site and reload apache
     ``` bash
         sudo a2ensite proxy
         sudo service apache2 reload

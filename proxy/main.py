@@ -105,7 +105,7 @@ def format_metadata(req_raw) -> str:
 
     # Get default values with CONSTRAINT_LEVEL from data_file location in .cfg
     root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    filename = os.path.join(root_path, f"proxy/assets/{CONSTRAINT_LEVEL}_defaults.json")
+    filename = os.path.join(root_path, f"/assets/{CONSTRAINT_LEVEL}_defaults.json")
     app.logger.debug(f"Reading rules file {filename}")
     defaults = read_json_file(filename)
 
