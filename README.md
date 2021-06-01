@@ -51,7 +51,7 @@ We assume you have a running Dataverse 4.20. installation and that you should ha
 5. Install package to system
     ``` bash
      cd /var/www/proxy
-     pip3 install --system .
+     sudo pip3 install .
     ```
 6. Create a new site in Apache
    ``` bash
