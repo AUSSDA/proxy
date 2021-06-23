@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "2.0.0"
 lxml = "4.6.3"
 requests = "2.25.1"
 

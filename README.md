@@ -1,13 +1,13 @@
 # Proxy for Dataverse OAI-MPH
 
-A small man-in-the-middle script for Dataverse 4.20.
+A small script to modify OAI exports of Dataverse 4.20.
 
-It acts as mediator between requests send by a harvesting client, such as CESSDA's Data Catalogue, and
-Dataverse's OAI-MPH endpoint. It solves the problem of missing elements in Dataverse's OAI-MPH exports,
+It ensures requests send by a harvesting client, such as CESSDA's Data Catalogue can parse the
+files. It solves the problem of missing elements in Dataverse's OAI-MPH exports,
 and enables us to be compliant with the DDI profile set out by CESSDA by using setting defaults for
 any field that does not have a value.
 
-Fundamentally, the proxy validates the pressence of paths or attributes defined as xpaths in the
+Fundamentally, the proxy validates the presence of paths or attributes defined as xpaths in the
 `assets/*_defaults.json` files. You can set the path and default values to whatever seems appropriate.
 
 Be aware that setting values on a dataset level is not possible. That is, if there are multiple
@@ -23,20 +23,21 @@ and then set the constraint level in `app/proxy.py`.
 
 We also provide a a small script `app/utils.py` that generates these files based on the profile xmls.
 
+/usr/local/glassfish4/glassfish/domains/domain1/files/**/export_ddi.cached
 
 Installation
 ------------
 
 We assume you have a running Dataverse 4.20. installation and that you should have a running Apache server.
 
-1. Install `mod_wsgi`
+1. Install `python3`
 
     ``` bash
-     sudo apt-get install libapache2-mod-wsgi-py3 python3 python3-pip
+     sudo apt-get install python3 python3-pip
     ```
-2. Clone this repo and install the app. We recommend putting it into `/var/www`
+2. Clone this repo and install the app. We recommend putting it into `/opt/proxy`
    ``` bash
-     git clone https://github.com/aussda/proxy /var/www/
+     git clone https://github.com/aussda/proxy /opt/proxy
    ```
 3. Modify defaults to to whatever seems appropriate.
     ``` bash
@@ -45,42 +46,22 @@ We assume you have a running Dataverse 4.20. installation and that you should ha
      sudo nano /var/www/proxy/assets/recommended_defaults.json
      # or
      sudo nano /var/www/proxy/assets/optional_defaults.json
-     # finally set level in
-     sudo nano /var/www/proxy/app/proxy.py
+     # (optional) set CONSTRAINT_LEVEL in
+     # sudo nano /var/www/proxy/app/proxy.py
     ```
-5. Install package to system
+4. Install package to system
     ``` bash
-     cd /var/www/proxy
+     cd /opt/proxy
      sudo pip3 install .
     ```
-6. Create a new site in Apache
-   ``` bash
-    sudo nano /etc/apache2/sites-available/proxy.conf
-   ```
-7. Edit the following example config and paste it into the config file created the last step.
-    ```
-    <VirtualHost *:80>
-            ServerName proxy.aussda.at
-            ServerAdmin info@aussda.at
-            WSGIScriptAlias / /var/www/proxy/apache.wsgi
-            LogLevel warn
-            ErrorLog ${APACHE_LOG_DIR}/proxy-error.log
-            CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
-    </VirtualHost>
-    <VirtualHost *:443>
-            ServerName proxy.aussda.at
-            ServerAdmin info@aussda.at
-            WSGIScriptAlias / /var/www/proxy/apache.wsgi
-            LogLevel warn
-            ErrorLog ${APACHE_LOG_DIR}/proxy-error.log
-            CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
-    </VirtualHost>
-    ```
-8. Enable the site and reload apache
+5. Create a cronjob
     ``` bash
-        sudo a2ensite proxy
-        sudo service apache2 reload
+    sudo crontab -e
+
+    # Every day at 04:05 run the script
+    5 4 * * * /usr/bin/python3 /opt/proxy/app/main.py
     ```
+
 
 Contact
 -------
