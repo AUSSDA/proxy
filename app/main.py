@@ -3,10 +3,6 @@
 """
 Contact:  info@aussda.at
 
-This is a small flask application that serves as reverse proxy and acts
-as man-in-the-middle. It passes a request to Dataverse's OAI endpoint, and
-adds all deafault values from the _defaults.json files.
-
 Tested only with Dataverse 4.20.
 """
 
@@ -14,25 +10,22 @@ Tested only with Dataverse 4.20.
 # Dependency imports
 # ------------------------------------------------------------------------- #
 
-import requests
 import os
-import sys
 import json
 import logging
 
-from flask import Flask, jsonify, request, Response, make_response
+from glob import glob
 from lxml import etree
 
 # ------------------------------------------------------------------------- #
 # Globals / Defaults
 # ------------------------------------------------------------------------- #
 
-app = Flask(__name__)
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
-logging.basicConfig(level=logging.INFO)
-
-HOSTNAME = "https://localhost:8080"  # default for glassfish
 CONSTRAINT_LEVEL = "mandatory"  # mandatory, optional, recommended
+
+FILES = "/usr/local/glassfish4/glassfish/domains/domain1/files/**/export_ddi.cached"
 NSMAP = {
     "xlmns": "http://www.openarchives.org/OAI/2.0/",
     "ddi": "ddi:codebook:2_5",
@@ -55,7 +48,7 @@ def read_json_file(filename):
 
 
 def pretty_xml(xml, indent=False):
-    return etree.tostring(xml, pretty_print=indent, encoding=str)
+    return etree.tostring(xml, pretty_print=indent, encoding=str, xml_declaration=True)
 
 
 def save_xml(xml, filename, indent=True):
@@ -68,27 +61,9 @@ def save_xml(xml, filename, indent=True):
 # ------------------------------------------------------------------------- #
 
 
-def place_request(path: str, query: str) -> str:
-    # Allow only to reach the OAI-MPH endpoint
-    if not path == "oai":
-        app.logger.warning("Invalid endpoint")
-        return None
-
-    # Generate url and place request
-    url = f"{HOSTNAME}/{path}?{query}"
-    try:
-        app.logger.info(f"Placing request to {url}")
-        req_raw = requests.get(url)
-    except:
-        app.logger.warning("Request could not be placed")
-        return None
-    app.logger.info(f"Successfully placed proxied request to '{url}'")
-    # Modify xml for compliance
-    req_format = format_metadata(req_raw)
-    return req_format
 
 
-def format_metadata(req_raw) -> str:
+def format_metadata(file) -> str:
     # Setup response as XML
     xml_parser = etree.XMLParser(
         remove_blank_text=True,
@@ -98,15 +73,19 @@ def format_metadata(req_raw) -> str:
         ns_clean=True,
         encoding="utf-8",
     )
-    app.logger.debug(f"Parsing response {req_raw.content}")
-    xml = etree.XML(req_raw.content, parser=xml_parser)
+    try:
+        xml = etree.parse(file, parser=xml_parser)
+    except lxml.etree.XMLSyntaxError as e:
+        logging.info("Empty file, continue.")
+
+
     metadata = xml.xpath("//xlmns:metadata", namespaces=NSMAP)[0]
-    app.logger.debug(f"Parsed XML: {pretty_xml(xml)}")
+    logging.debug(f"Parsed XML: {pretty_xml(xml)}")
 
     # Get default values with CONSTRAINT_LEVEL from data_file location in .cfg
     root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
     filename = os.path.join(root_path, f"/assets/{CONSTRAINT_LEVEL}_defaults.json")
-    app.logger.debug(f"Reading rules file {filename}")
+    logging.debug(f"Reading rules file {filename}")
     defaults = read_json_file(filename)
 
     # ToDo: Exception handling with XPathEvalError and XPathSyntaxError
@@ -114,7 +93,7 @@ def format_metadata(req_raw) -> str:
     for rule, value in defaults.items():
         path, attrib, ns = None, None, None
 
-        app.logger.info(f"Ensuring rule '{path}'")
+        logging.info(f"Ensuring rule '{path}'")
         path = gen_metadata_xpath(rule)
         if "@" in path:
             # Attribute rule
@@ -127,45 +106,44 @@ def format_metadata(req_raw) -> str:
             path = path[:-1] if path[-1] == "/" else path
 
             # Get first element matching path
-            app.logger.debug(f"Querying path '{path}'")
+            logging.debug(f"Querying path '{path}'")
             el = metadata.xpath(path, namespaces=NSMAP)
             if len(el) == 0:
                 el = add_element_xpath(metadata, path)
             else:
-                app.logger.debug(f"Got element {el[0]}")
+                logging.debug(f"Got element {el[0]}")
                 el = el[0]
 
-            app.logger.debug(f"Attributes at element are {el.attrib.keys()}")
+            logging.debug(f"Attributes at element are {el.attrib.keys()}")
             attrib_exists = any([attrib in a for a in el.attrib.keys()])
             if not attrib_exists:
                 # Add namespace to attrib if needed
                 if ns is not None:
                     attrib = "{" + NSMAP[ns] + "}" + attrib
                 # Set attribute with default value
-                app.logger.info(f"Setting attribute '{attrib}' to default '{value}'")
+                logging.info(f"Setting attribute '{attrib}' to default '{value}'")
                 el.set(attrib, value)
         else:
             # Element rule
             el = metadata.xpath(path, namespaces=NSMAP)
             if len(el) == 0:
-                app.logger.debug(f"Path not found, adding")
+                logging.debug(f"Path not found, adding")
                 el = add_element_xpath(metadata, path)
             else:
-                app.logger.debug(f"Found path. Got element {el[0]}")
+                logging.debug(f"Found path. Got element {el[0]}")
                 el = el[0]
 
             # Keep text if exist, otherwise use default
             if len(el.text) == 0:
-                app.logger.info(f"Setting text to {value}")
+                logging.info(f"Setting text to {value}")
                 el.text = value
 
-    return pretty_xml(xml, indent=True)
+    save_xml(xml, file)
 
 
 def gen_metadata_xpath(path: str):
     # Only add namespce after /codebook/
     _, item = path.split("/codeBook")
-
     # Seperate attribute from path
     if "@" in item:
         p, attrib = item.split("/@")
@@ -198,34 +176,17 @@ def add_element_xpath(metadata: etree._Element, path: str):
     # ToDo: verify len() > 1 or in other words that existing actually exists
     existing_element = metadata.xpath(existing, namespaces=NSMAP)[0]
     new = etree.SubElement(existing_element, new)
-    app.logger.debug(f"Added element {new}")
+    logging.debug(f"Added element {new}")
     return new
 
 
-# ------------------------------------------------------------------------- #
-# Web APIs
-# ------------------------------------------------------------------------- #
 
+def main():
+    export_ddi_files = glob(pathname=FILES, recursive=True)
+    for file in export_ddi_files:
+        logging.info(f"Formatting: {file}")
+        format_metadata(file)
 
-@app.route("/health")
-def health():
-    """Minimal health check"""
-    return jsonify({"stauts": "ok"})
-
-
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>", methods=["GET"])
-def proxy(path):
-    """Endpoint for harvesting"""
-
-    query = str(request.query_string, "utf-8")
-    valid_file = place_request(path, query)
-    if valid_file is None:
-        resp = make_response("<p>ERROR - Please contact info@aussda.at</p>", 500)
-    else:
-        resp = make_response(valid_file)
-        resp.headers["Content-Type"] = "text/xml;charset=utf-8"
-    return resp
 
 
 # ------------------------------------------------------------------------- #
@@ -233,6 +194,4 @@ def proxy(path):
 # ------------------------------------------------------------------------- #
 
 if __name__ == "__main__":
-    # WARNING: DO NOT RUN IN PRODUCTION.
-    port = int(os.environ.get("PORT", 8081))
-    app.run(host="0.0.0.0", port=port)
+    main()
