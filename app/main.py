@@ -19,6 +19,7 @@ import os
 import sys
 from pathlib import Path
 
+import lxml
 from lxml import etree
 
 # ------------------------------------------------------------------------- #
@@ -50,7 +51,7 @@ def read_json_file(filename):
 
 
 def pretty_xml(xml, indent=False):
-    return etree.tostring(xml, pretty_print=indent, encoding=str)
+    return etree.tostring(xml, method="xml", pretty_print=indent, encoding=str)
 
 
 def save_xml(xml, filename, indent=True):
@@ -63,7 +64,7 @@ def save_xml(xml, filename, indent=True):
 # ------------------------------------------------------------------------- #
 
 
-def format_metadata(filename) -> str:
+def format_metadata(filename):
     # Setup response as XML
     xml_parser = etree.XMLParser(
         remove_blank_text=True,
@@ -73,55 +74,62 @@ def format_metadata(filename) -> str:
         ns_clean=True,
         encoding="utf-8",
     )
-    xml = etree.XML(filename, parser=xml_parser)
-    metadata = xml.xpath("//xlmns:metadata", namespaces=NSMAP)[0]
 
-    # Get default values with CONSTRAINT_LEVEL from data_file location in .cfg
-    root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-    filename = os.path.join(root_path, f"/assets/{CONSTRAINT_LEVEL}_defaults.json")
-    defaults = read_json_file(filename)
+    try:
+        print(filename)
+        xml = etree.parse(filename, parser=xml_parser)
+        # Get default values with CONSTRAINT_LEVEL from data_file location in .cfg
+        root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
+        defaults_filename = root_path + f"/assets/{CONSTRAINT_LEVEL}_defaults.json"
+        defaults = read_json_file(defaults_filename)
 
-    # ToDo: Exception handling with XPathEvalError and XPathSyntaxError
-    # Iterate over paths and set default values if no value present
-    for rule, value in defaults.items():
-        path, attrib, ns = None, None, None
-        path = gen_metadata_xpath(rule)
-        if "@" in path:
-            # Attribute rule
-            path, attrib = path.split("@")
-            if ":" in attrib:
-                # Attribute rule with namespace
-                ns, attrib = attrib.split(":")
+        # Iterate over paths and set default values if no value present
+        for rule, value in defaults.items():
+            path, attrib, ns = None, None, None
+            path = gen_metadata_xpath(rule)
+            if "@" in path:
+                # Attribute rule
+                path, attrib = path.split("@")
+                if ":" in attrib:
+                    # Attribute rule with namespace
+                    ns, attrib = attrib.split(":")
 
-            # Remove trailing slash for xpath
-            path = path[:-1] if path[-1] == "/" else path
+                # Remove trailing slash for xpath
+                path = path[:-1] if path[-1] == "/" else path
 
-            # Get first element matching path
-            el = metadata.xpath(path, namespaces=NSMAP)
-            if len(el) == 0:
-                el = add_element_xpath(metadata, path)
+                # Get first element matching path
+                el = xml.xpath(path, namespaces=NSMAP)
+                if len(el) == 0:
+                    el = add_element_xpath(xml, path)
+                else:
+                    el = el[0]
+                attrib_exists = any([attrib in a for a in el.attrib.keys()])
+                if not attrib_exists:
+                    # Add namespace to attrib if needed
+                    if ns is not None:
+                        attrib = "{" + NSMAP[ns] + "}" + attrib
+                    # Set attribute with default value
+                    el.set(attrib, value)
             else:
-                el = el[0]
-            attrib_exists = any([attrib in a for a in el.attrib.keys()])
-            if not attrib_exists:
-                # Add namespace to attrib if needed
-                if ns is not None:
-                    attrib = "{" + NSMAP[ns] + "}" + attrib
-                # Set attribute with default value
+                # Element rule
+                el = xml.xpath(path, namespaces=NSMAP)
+                if len(el) == 0:
+                    el = add_element_xpath(xml, path)
+                else:
+                    el = el[0]
+                # Keep text if exist, otherwise use default
+                if len(el.text) == 0:
+                    el.text = value
+            return pretty_xml(xml, indent=True)
 
-                el.set(attrib, value)
-        else:
-            # Element rule
-            el = metadata.xpath(path, namespaces=NSMAP)
-            if len(el) == 0:
-                el = add_element_xpath(metadata, path)
-            else:
-                el = el[0]
-            # Keep text if exist, otherwise use default
-            if len(el.text) == 0:
-                el.text = value
+    except lxml.etree.XMLSyntaxError:
+        pass  # empty file
+    except lxml.etree.XPathEvalError:
+        pass  # xpath not found
+    except lxml.etree.XPathSyntaxError:
+        pass  # default path malformed
 
-    return pretty_xml(xml, indent=True)
+    return None
 
 
 def gen_metadata_xpath(path: str):
@@ -173,8 +181,11 @@ def main():
     p = Path(FILE_ROOT)
     files = list(p.glob("**/*ddi.cached"))
     for filename in files:
-        with open(file, "r+") as f:
-            pass
+        print(filename)
+        new = format_metadata(str(filename))
+        if new is not None:
+            with open(filename, "w") as f:
+                f.write(new)
 
 
 if __name__ == "__main__":

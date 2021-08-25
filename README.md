@@ -28,31 +28,15 @@ We also provide a a small script `app/utils.py` that generates these files based
 Installation
 ------------
 
-We assume you have a running Dataverse 4.20. installation and that you should have a running Apache server.
+We assume you have a running Dataverse 4.20 or later and that you have Python 3.8 installed.
 
-1. Install `python3`
+clone
+install dependencies
+create contaj
 
+1. Install Pipenv. For options see [here](https://pipenv.pypa.io/en/latest/install/#installing-pipenv)
     ``` bash
-     sudo apt-get install python3 python3-pip
-    ```
-2. Clone this repo and install the app. We recommend putting it into `/opt/proxy`
-   ``` bash
-     git clone https://github.com/aussda/proxy /opt/proxy
-   ```
-3. Modify defaults to to whatever seems appropriate.
-    ``` bash
-     sudo nano /var/www/proxy/assets/mandatory_defaults.json
-     # or
-     sudo nano /var/www/proxy/assets/recommended_defaults.json
-     # or
-     sudo nano /var/www/proxy/assets/optional_defaults.json
-     # (optional) set CONSTRAINT_LEVEL in
-     # sudo nano /var/www/proxy/app/proxy.py
-    ```
-4. Install package to system
-    ``` bash
-     cd /opt/proxy
-     sudo pip3 install .
+    pip3 install pipenv
     ```
 5. Create a cronjob
     ``` bash
@@ -61,6 +45,7 @@ We assume you have a running Dataverse 4.20. installation and that you should ha
     # Every day at 04:05 run the script
     5 4 * * * /usr/bin/python3 /opt/proxy/app/main.py
     ```
+pipenv run sudo python3 app/main.py
 
 
 Contact
