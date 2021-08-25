@@ -1,19 +1,18 @@
-[source]
+[[source]]
 url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
 [packages]
-lxml = "4.6.3"
-requests = "2.25.1"
+lxml = "==4.6.3"
 
 [dev-packages]
-jupyter = "*"
 pytest = "*"
 black = "*"
+isort = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true

@@ -2,19 +2,23 @@
 Testing of proxy.py functions.
 """
 
-import proxy
-import utils
 import pytest
 import requests
+import utils
+
+import proxy
+
 
 @pytest.fixture
 def oai_ddi_test_file():
     test_dataset = "doi:10.11587/BQVSOW"
     return f"oai?verb=GetRecord&metadataPrefix=oai_ddi&identifier={test_dataset}"
 
+
 @pytest.fixture
 def validate_cessda():
     pass
+
 
 def test_yield_num_mandatory_rules_mono():
     from collections import Counter
@@ -44,6 +48,7 @@ def test_invalid_url():
 
 def test_valid_url():
     assert proxy.place_request(oai_ddi_test_file, None) == None
+
 
 def test_valid_formatting():
     pass

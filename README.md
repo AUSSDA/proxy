@@ -1,6 +1,6 @@
-# Proxy for Dataverse OAI-MPH
+# Proxy for Dataverse OAI-MPHt
 
-A small script to modify OAI exports of Dataverse 4.20.
+A small man-in-the-middle script for Dataverse.
 
 It ensures requests send by a harvesting client, such as CESSDA's Data Catalogue can parse the
 files. It solves the problem of missing elements in Dataverse's OAI-MPH exports,
