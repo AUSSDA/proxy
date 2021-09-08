@@ -43,8 +43,8 @@ NSMAP = {
 
 def read_json_file(filename):
     try:
-        with open(filename, encoding="utf-8") as file:
-            return json.load(file)
+        with open(filename, encoding="utf-8") as f:
+            return json.load(f)
     except:
         print("[ERROR] File with default values not found. Check utils.py")
         sys.exit(1)
@@ -113,14 +113,15 @@ def format_metadata(filename):
             else:
                 # Element rule
                 el = xml.xpath(path, namespaces=NSMAP)
-                if len(el) == 0:
+                if len(el) == 0: # element does not exist
                     el = add_element_xpath(xml, path)
-                else:
-                    el = el[0]
-                # Keep text if exist, otherwise use default
-                if len(el.text) == 0:
-                    el.text = value
-            return pretty_xml(xml, indent=True)
+                else: # one or multiple instances of element exist
+                    for e in el:
+                        # Keep text if exist, otherwise use default
+                        if e.text == None:
+                            e.text = value
+                
+        return pretty_xml(xml, indent=True)
 
     except lxml.etree.XMLSyntaxError:
         pass  # empty file
@@ -164,12 +165,14 @@ def gen_metadata_xpath(path: str):
 def add_element_xpath(metadata: etree._Element, path: str):
     # Assume last piece of path is not found
     elements = path.split("/")
-    existing, new = "/".join([p for p in elements[:-1]]), elements[-1].split(":")[1]
-    # ToDo: verify len() > 1 or in other words that existing actually exists
-    existing_element = metadata.xpath(existing, namespaces=NSMAP)[0]
-    new = etree.SubElement(existing_element, new)
-
-    return new
+    existing_el, new_el = "/".join([p for p in elements[:-1]]), elements[-1].split(":")[1]
+    root_el = metadata.xpath(existing_el, namespaces=NSMAP) 
+    if len(root_el) > 0: # superpath exists
+        new = etree.SubElement(root_el[0], new_el)
+        return new
+    else: # superpath does not exist
+        new = etree.SubElement(metadata.getroot(), new_el)
+        return new
 
 
 # ------------------------------------------------------------------------- #
@@ -178,15 +181,19 @@ def add_element_xpath(metadata: etree._Element, path: str):
 
 
 def main():
+    import datetime
+    startDate = datetime.datetime.now()
+    print(f"[info] Starting run at {startDate}")
     p = Path(FILE_ROOT)
-    files = list(p.glob("**/*ddi.cached"))
+    files = list(p.glob("**/export_oai_ddi.cached"))
     for filename in files:
         print(filename)
         new = format_metadata(str(filename))
         if new is not None:
             with open(filename, "w") as f:
                 f.write(new)
-
+    endDate = datetime.datetime.now()
+    print(f"[info] Done at {endDate}. Updated {len(files)} files. ")
 
 if __name__ == "__main__":
     main()
