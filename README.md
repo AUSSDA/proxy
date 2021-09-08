@@ -1,4 +1,4 @@
-# Proxy for Dataverse OAI-MPHt
+# Proxy for Dataverse OAI-MPH
 
 This script ensures requests send by CESSDA's Data Catalogue can parse the the OAI files. It solves the problem of missing elements in Dataverse's OAI-MPH exports, and enables us to be compliant with the DDI profile set out by CESSDA by using setting defaults for any field that does not have a value.
 
