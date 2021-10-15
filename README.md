@@ -19,7 +19,7 @@ Generating defaults
 
 We also provide a a small script `app/utils.py` that generates these files based on the profile xmls. It generatex xpaths from an DDI profile.
 
-```bash
+```
 $ python3 app/utils.py --help
 usage: utils.py [-h] [-c CONSTRAINT] [-p PROFILE]
 
