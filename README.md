@@ -1,15 +1,60 @@
 # Proxy for Dataverse OAI-MPH
 
-This script ensures requests send by CESSDA's Data Catalogue can parse the the OAI files. It solves the problem of missing elements in Dataverse's OAI-MPH exports, and enables us to be compliant with the DDI profile set out by CESSDA by using setting defaults for any field that does not have a value.
+This script ensures [CESSDA's Data Catalogue](https://datacatalogue.cessda.eu/?publisher.publisher[0]=Austrian%20Social%20Science%20Data%20Archive%20%28AUSSDA%29) can request OAI files from AUSSDA's Dataverse.
 
-The script validates the presence of paths or attributes defined as xpaths in the `assets/*_defaults.json` files. You can set the path and default values to whatever seems appropriate.
 
-Be aware that setting values on a dataset level is not possible. If there are multiple datasets missing the _abstract_ element, the proxy will set the same default value for all.
+Setup
+-----
 
-There are different constraint levels defined by CESSDA, they are `mandatory`,`optional`, `recommended`. The proxy is setup to ensure the existence of `mandatory` fields by default. If you would like to also include other constraints, firstly set default values in the related `*_defaults.json` file and then set the constraint level in `app/proxy.py`.
+The checks if paths or attributes are present. It adds default entries for any missing element in [Dataverse's OAI exports](https://guides.dataverse.org/en/latest/admin/harvestserver.html), and enables AUSSDA to be compliant with the constraints of the DDI profile defined by CESSDA. These are defined as [xpath](https://de.wikipedia.org/wiki/XPath) in the `assets/*_defaults.json` files.
 
-We also provide a a small script `app/utils.py` that generates these files based on the profile xmls.
+The `assets/*_defaults.json` files relate to the different constraint levels defined by CESSDA - they are `mandatory`,`optional`, `recommended`. By default the proxy is setup to ensure the existence of `mandatory` field. **You have to populate `assets/mandatory_defaults.json` with default values**. These values will be visible at the Data Catalogue. 
 
+If you want to enable another constraint level, simply edit CONSTRAINT_LEVEL in `app/proxy.py` (line 31). If you would like to add other, custom metadata fields in the export, create a new file named `assets/custom_defaults.json`, add xpaths and set default values.
+
+Be aware that setting values on a dataset level is not possible. If there are multiple datasets missing the _abstract_ element, the proxy will set the same default value for all. You cannot define abstract `A` for one datafile and abstract `B` for another datafile.
+
+Generating defaults
+-------------------
+
+We also provide a a small script `app/utils.py` that generates these files based on the profile xmls. It generatex xpaths from an DDI profile.
+
+```bash
+$ python3 app/utils.py --help
+usage: utils.py [-h] [-c CONSTRAINT] [-p PROFILE]
+
+Creates a json file for each field/attribute per constraint level
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONSTRAINT, --constraint CONSTRAINT
+  -p PROFILE, --profile PROFILE
+```
+
+For example to process the `cdc25_profile.xml`, run this command to generate a `mandatory_defaultsl.json`
+
+```bash
+$ python3 app/utils.py -p assets/cdc25_profile_mono.xml 
+```
+
+You should now have an empty `mandatory_defaultsl.json` file
+
+```bash
+$ cat assets/mandatory_defaults.json 
+{
+  "/codeBook/@xml:lang": "",
+  "/codeBook/@xsi:schemaLocation": "",
+  "/codeBook/stdyDscr/citation/titlStmt/titl": "",
+  "/codeBook/stdyDscr/citation/titlStmt/IDNo": "",
+  "/codeBook/stdyDscr/citation/titlStmt/IDNo/@agency": "",
+  "/codeBook/stdyDscr/citation/holdings/@URI": "",
+  "/codeBook/stdyDscr/citation/distStmt/distrbtr": "",
+  "/codeBook/stdyDscr/citation/distStmt/distDate/@date": "",
+  "/codeBook/stdyDscr/stdyInfo/abstract": "",
+  "/codeBook/stdyDscr/stdyInfo/sumDscr/collDate/@event": ""
+}%                                                                                                                                                    
+
+```
 
 Installation
 ------------
@@ -39,7 +84,7 @@ create contaj
     sudo crontab -e
 
     # Every day at 04:00 run the script. Output to logs
-    * 4 * * *  pipenv run sudo python3 /etc/dataverse/proxy/app/main.py > etc/dataverse/proxy/cron.log 2>&1
+    * 4 * * * /usr/bin/su - dataverse -c 'pipenv run sudo python3 /etc/dataverse/proxy/app/main.py >> /etc/dataverse/proxy/cron.log 2>&1'
     ```
 
 
