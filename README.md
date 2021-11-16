@@ -84,7 +84,7 @@ create contaj
     sudo crontab -e
 
     # Every day at 04:00 run the script. Output to logs
-    * 4 * * * /usr/bin/su - dataverse -c 'pipenv run sudo python3 /etc/dataverse/proxy/app/main.py >> /etc/dataverse/proxy/cron.log 2>&1'
+    * 4 * * * /usr/bin/su - dataverse -c 'sh /etc/dataverse/proxy/run'
     ```
 
 
