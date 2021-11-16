@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import sys
+import shutil
 from pathlib import Path
 
 import lxml
@@ -76,7 +77,6 @@ def format_metadata(filename):
     )
 
     try:
-        print(filename)
         xml = etree.parse(filename, parser=xml_parser)
         # Get default values with CONSTRAINT_LEVEL from data_file location in .cfg
         root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
@@ -109,26 +109,29 @@ def format_metadata(filename):
                     if ns is not None:
                         attrib = "{" + NSMAP[ns] + "}" + attrib
                     # Set attribute with default value
+                    print(f"{el}: Setting  {attrib} to {value}")
                     el.set(attrib, value)
             else:
                 # Element rule
                 el = xml.xpath(path, namespaces=NSMAP)
                 if len(el) == 0: # element does not exist
                     el = add_element_xpath(xml, path)
+                    print(f"{el}: Added element {path}")
                 else: # one or multiple instances of element exist
                     for e in el:
                         # Keep text if exist, otherwise use default
                         if e.text == None:
                             e.text = value
+                            print(f"{el}: Adding text {value}")
                 
         return pretty_xml(xml, indent=True)
 
     except lxml.etree.XMLSyntaxError:
-        pass  # empty file
+        print("[ERROR] XMLSyntaxError at " + filename)
     except lxml.etree.XPathEvalError:
-        pass  # xpath not found
+        print("[ERROR] XPathEvalError at " + filename)
     except lxml.etree.XPathSyntaxError:
-        pass  # default path malformed
+        print("[ERROR] XPathSyntaxError at " + filename)
 
     return None
 
@@ -185,9 +188,13 @@ def main():
     startDate = datetime.datetime.now()
     print(f"[info] Starting run at {startDate}")
     p = Path(FILE_ROOT)
-    files = list(p.glob("**/export_oai_ddi.cached"))
+    files = list(p.glob("**/domain1/files/**/export_oai_ddi.cached"))
     for filename in files:
         print(filename)
+        p = Path(Path.cwd() / "backups/")
+        q = p / filename.relative_to(filename.anchor)
+        q.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(filename, q)    
         new = format_metadata(str(filename))
         if new is not None:
             with open(filename, "w") as f:
