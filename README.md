@@ -61,10 +61,6 @@ Installation
 
 We assume you have a running Dataverse 4.20 or later and that you have Python 3.8 installed.
 
-clone
-install dependencies
-create contaj
-
 1. Clone the repostiory somewhere. We recommend something like `/etc/dataverse`.
     ``` bash
     mkdir /etc/dataverse
