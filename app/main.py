@@ -18,6 +18,7 @@ import logging
 import os
 import sys
 import shutil
+import datetime
 from pathlib import Path
 
 import lxml
@@ -29,7 +30,6 @@ from lxml import etree
 
 
 FILE_ROOT = "/usr/local/payara5"  # default for payara5
-CONSTRAINT_LEVEL = "mandatory"  # mandatory, optional, recommended
 NSMAP = {
     "xlmns": "http://www.openarchives.org/OAI/2.0/",
     "ddi": "ddi:codebook:2_5",
@@ -80,7 +80,7 @@ def format_metadata(filename):
         xml = etree.parse(filename, parser=xml_parser)
         # Get default values with CONSTRAINT_LEVEL from data_file location in .cfg
         root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-        defaults_filename = root_path + f"/assets/{CONSTRAINT_LEVEL}_defaults.json"
+        defaults_filename = root_path + f"/assets/defaults.json"
         defaults = read_json_file(defaults_filename)
 
         # Iterate over paths and set default values if no value present
@@ -184,7 +184,6 @@ def add_element_xpath(metadata: etree._Element, path: str):
 
 
 def main():
-    import datetime
     startDate = datetime.datetime.now()
     print(f"[info] Starting run at {startDate}")
     p = Path(FILE_ROOT)

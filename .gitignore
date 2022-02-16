@@ -1,4 +1,4 @@
 .pytest_cache
 .ipynb_checkpoints
-
+venv/
 cron.log
