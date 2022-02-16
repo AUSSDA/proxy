@@ -94,7 +94,7 @@ We assume you have a running **Dataverse 4.20** or later and that you have **Pyt
     sudo crontab -e
 
     # Every day at 04:00 run the script. Output to logs
-    * 4 * * * /usr/bin/su - dataverse -c 'sh /etc/dataverse/proxy/scripts/run'
+    * 4 * * * /usr/bin/su - dataverse -c 'python3 /etc/dataverse/proxy/app/main.py'
     ```
 
 
