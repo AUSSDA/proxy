@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import argparse
 import json
 import sys
@@ -55,7 +56,7 @@ def gen_rules_defaults(
     for rule in gen_rules(constraint, profile):
         data[rule] = ""
 
-    filename = f"assets/defaults.json"
+    filename = "assets/defaults.json"
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=2)
 
@@ -64,10 +65,18 @@ def main(args) -> None:
     p = argparse.ArgumentParser(
         description="Creates a json file for each field/attribute per constraint level"
     )
-    p.add_argument("-c", "--constraint", action="append", 
-        help="Mandatory, recommended, optional constraint level")
-    p.add_argument("-p", "--profile", default="assets/cdc25_profile_mono.xml", 
-        help="The location of the file to parse")
+    p.add_argument(
+        "-c",
+        "--constraint",
+        action="append",
+        help="Mandatory, recommended, optional constraint level",
+    )
+    p.add_argument(
+        "-p",
+        "--profile",
+        default="assets/cdc25_profile_mono.xml",
+        help="The location of the file to parse",
+    )
     args = p.parse_args()
     gen_rules_defaults(constraint=args.constraint, profile=args.profile)
 

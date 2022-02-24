@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-Contact:  info@aussda.at
-
-This is a small script for modifying Dataverse's DDI exports such that
-they compley with CESSDA's requirements.
-
-Tested on Dataverse 5.4.1
-"""
-
 # ------------------------------------------------------------------------- #
 # Dependency imports
 # ------------------------------------------------------------------------- #
@@ -18,19 +9,22 @@ import logging
 import os
 import sys
 import shutil
-import datetime
+
+from datetime import date, timedelta
 from pathlib import Path
 
-import lxml
+
 from lxml import etree
 
 # ------------------------------------------------------------------------- #
 # Globals / Defaults
 # ------------------------------------------------------------------------- #
 
-logging.basicConfig(filename="proxy.log", format="%(asctime)s::%(levelname)s::%(message)s")
+fmt = "%(asctime)s::%(levelname)s::%(message)s"
+logging.basicConfig(filename="proxy.log", format=fmt, level=logging.DEBUG)
 
-FILE_ROOT = "/usr/local/payara5"  # default for payara5
+FILE_ROOT = "/home/daniel/Downloads"
+# FILE_ROOT = "/usr/local/payara5"  # default for payara5
 NSMAP = {
     "xlmns": "http://www.openarchives.org/OAI/2.0/",
     "ddi": "ddi:codebook:2_5",
@@ -79,9 +73,8 @@ def format_metadata(filename):
 
     try:
         xml = etree.parse(filename, parser=xml_parser)
-        # Get default values with CONSTRAINT_LEVEL from data_file location in .cfg
         root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-        defaults_filename = root_path + f"/assets/defaults.json"
+        defaults_filename = root_path + "/assets/defaults.json"
         defaults = read_json_file(defaults_filename)
 
         # Iterate over paths and set default values if no value present
@@ -101,7 +94,9 @@ def format_metadata(filename):
                 # Get first element matching path
                 el = xml.xpath(path, namespaces=NSMAP)
                 if len(el) == 0:
+                    logging.info("Adding element \"%s\"", rule)
                     el = add_element_xpath(xml, path)
+                    logging.debug(path)
                 else:
                     el = el[0]
                 attrib_exists = any([attrib in a for a in el.attrib.keys()])
@@ -110,34 +105,46 @@ def format_metadata(filename):
                     if ns is not None:
                         attrib = "{" + NSMAP[ns] + "}" + attrib
                     # Set attribute with default value
-                    logging.info(f"{el}: Setting  {attrib} to {value}")
+                    logging.info("Attribute set to \"%s\" on \"%s\"", value, rule)
                     el.set(attrib, value)
+                else:
+                    logging.info("Attribute \"%s\" already present", rule)
             else:
                 # Element rule
                 el = xml.xpath(path, namespaces=NSMAP)
-                if len(el) == 0: # element does not exist
+                if len(el) == 0:  # element does not exist
                     el = add_element_xpath(xml, path)
-                    logging.info(f"{el}: Added element {path}")
-                else: # one or multiple instances of element exist
-                    for e in el:
-                        # Keep text if exist, otherwise use default
-                        if e.text == None:
-                            e.text = value
-                            logging.info(f"{el}: Adding text {value}")
+                    logging.debug(path)
+                    logging.info("Added element \"%s\"", rule)
                 
+                # TODO Make two occurences of element possible
+                # TODO Fix bug where text is not added and requires rerun
+                for e in el:
+                    # Keep text if exist, otherwise use default
+                    if e.text == None:
+                        e.text = value
+                        logging.info("Adding text \"%s\" on \"%s\"", value, rule)
+                    else:
+                        logging.info("Element \"%s\" already set to \"%s\"", rule, e.text)
+
         return pretty_xml(xml, indent=True)
 
-    except lxml.etree.XMLSyntaxError:
+    except etree.XMLSyntaxError:
         logging.error("XMLSyntaxError at %s", filename)
-    except lxml.etree.XPathEvalError:
+    except etree.XPathEvalError:
         logging.error("XPathEvalError at %s", filename)
-    except lxml.etree.XPathSyntaxError:
+    except etree.XPathSyntaxError:
         logging.error("XPathSyntaxError at %s", filename)
 
     return None
 
 
-def gen_metadata_xpath(path: str):
+def gen_metadata_xpath(path: str) -> str:
+    """Returns a properly formated xpath that lxml can read.
+    Used as intermediate step to get an element in an xml
+    from a specified rule in the defaults.json
+    """
+
     # Only add namespce after /codebook/
     _, item = path.split("/codeBook")
 
@@ -167,14 +174,19 @@ def gen_metadata_xpath(path: str):
 
 
 def add_element_xpath(metadata: etree._Element, path: str):
+    """Creates a properly formated xpath that lxml can use.
+    Used to create new elements in the XML file at the
+    correct position.
+    """
+
     # Assume last piece of path is not found
     elements = path.split("/")
     existing_el, new_el = "/".join([p for p in elements[:-1]]), elements[-1].split(":")[1]
-    root_el = metadata.xpath(existing_el, namespaces=NSMAP) 
-    if len(root_el) > 0: # superpath exists
+    root_el = metadata.xpath(existing_el, namespaces=NSMAP)
+    if len(root_el) > 0:  # superpath exists
         new = etree.SubElement(root_el[0], new_el)
         return new
-    else: # superpath does not exist
+    else:  # superpath does not exist
         new = etree.SubElement(metadata.getroot(), new_el)
         return new
 
@@ -185,22 +197,33 @@ def add_element_xpath(metadata: etree._Element, path: str):
 
 
 def main():
-    startDate = datetime.datetime.now()
-    logging.info(f"Starting run at {startDate}")
+    logging.info("Starting run")
+
+    # create backup folder if not exists, keep last 10 days
+    backups = Path(Path.cwd() / "backups/")
+    for d in backups.iterdir():
+        if ".gitkeep" not in d.name:
+            d_date = date.fromisoformat(d.name)
+            max_store = date.today() - timedelta(days=10)
+            if d_date < max_store:
+                logging.info("Removing backup older than 10 days %s", str(d))
+                shutil.rmtree(d)
+
     p = Path(FILE_ROOT)
-    files = list(p.glob("**/domain1/files/**/export_oai_ddi.cached"))
+    files = list(p.glob("**/export_oai_ddi.cached"))
+    #    files = list(p.glob("**/domain1/files/**/export_oai_ddi.cached"))
     for filename in files:
-        logging.info(filename)
-        p = Path(Path.cwd() / "backups/")
-        q = p / filename.relative_to(filename.anchor)
-        q.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(filename, q)    
+        logging.info("Processng file %s", filename)
+        today = backups / str(date.today()) / filename.relative_to(filename.anchor)
+        today.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(filename, today)
         new = format_metadata(str(filename))
         if new is not None:
             with open(filename, "w") as f:
                 f.write(new)
-    endDate = datetime.datetime.now()
-    logging.info(f"Done at {endDate}. Updated {len(files)} files.")
+
+    logging.info("Done. Processed %s files.", len(files))
+
 
 if __name__ == "__main__":
     main()

@@ -94,8 +94,19 @@ We assume you have a running **Dataverse 4.20** or later and that you have **Pyt
     sudo crontab -e
 
     # Every day at 04:00 run the script. Output to logs
-    * 4 * * * /usr/bin/su - dataverse -c 'python3 /etc/dataverse/proxy/app/main.py'
+    0 4 * * * /usr/bin/su - dataverse -c 'python3 /etc/dataverse/proxy/app/main.py'
     ```
+
+Note that Dataverse [automatically generates metadata exports](https://guides.dataverse.org/en/5.6/admin/metadataexport.html) daily, so we need to run the script daily as well.
+
+Configuration page
+------------------
+
+You can create a simple `html` page that shows the proxy's configuraton. Simply run
+
+``` bash
+python3 public/gen_report.py
+```
 
 
 Contribution and contact

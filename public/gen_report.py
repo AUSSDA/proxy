@@ -7,11 +7,14 @@ import datetime
 
 from lxml import etree
 
-def head() -> str:
-    return """
-    <!doctype html>
-    <html class="no-js" lang="en">
+# Assume run from root directory
+PROFILE = "assets/cdc25_profile_mono.xml"
+DEFAULTS = "assets/defaults.json"
+REPORT = "public/report.html"
 
+def head() -> str:
+    return """<!doctype html>
+    <html class="no-js" lang="en">
     <head>
         <meta charset="utf-8">
         <title>Proxy</title>
@@ -45,23 +48,29 @@ def head() -> str:
             tr:nth-child(even) {
                 background-color: #dddddd;
             }
+
+            .descr {
+                margin-bottom: 25px;
+                word-wrap: break-word;
+            }
         </style>
     </head>
     """
 
+
 def body_start() -> str:
-    return """
-    <body>
+    return """<body>
     <header><h1>Proxy Configuration</h1></header>
-    XPath: Location of element in file <br/>
-    Value: The value visible in data catalogue<br/>
-    Constraint: Is the field required, mandatory, optional <br/>
-    UI Label: The name of the field in data catalogue<br/>
-    <br/>
+    <div class="descr">
+        XPath: Location of element in file<br/>
+        Value: The value visible in data catalogue<br/>
+        Constraint: Is the field required, mandatory, optional<br/>
+        UI Label: The name of the field in data catalogue<br/>
+    </div>
     <table>
     <thead><tr>
-        <th>XPath</th>
-        <th>Value</th>
+        <th style="width:30%">XPath</th>
+        <th style="width:30%">Value</th>
         <th>Constraint</th>
         <th>UI Label</th>
         <th>Type</th>
@@ -70,9 +79,11 @@ def body_start() -> str:
     <tbody>
     """
 
-def table_row(xpath: str, value: str, constraint: str, ui_label: str, ctype: str, notes: str) -> str:
-    return f"""
-    <tr>
+
+def table_row(
+    xpath: str, value: str, constraint: str, ui_label: str, ctype: str, notes: str
+) -> str:
+    return f"""<tr>
         <td class="wrap">{xpath}</td>
         <td>{value}</td>
         <td>{constraint}</td>
@@ -82,26 +93,24 @@ def table_row(xpath: str, value: str, constraint: str, ui_label: str, ctype: str
     </tr>
     """
 
+
 def body_end() -> str:
-    return f"""
-    </tbody>
+    return f"""</tbody>
     </table>
     <p><i>Modified: {datetime.datetime.now()}</i></p>
     </body>
     </html>
     """
 
-profile = "cdc25_profile_mono.xml"
-
 # Parse file as xml
 xml_parser = etree.XMLParser(
-        remove_blank_text=True,
-        remove_comments=True,
-        load_dtd=True,
-        attribute_defaults=True,
-        ns_clean=True,
+    remove_blank_text=True,
+    remove_comments=True,
+    load_dtd=True,
+    attribute_defaults=True,
+    ns_clean=True,
 )
-profile = etree.parse(profile, parser=xml_parser)
+profile = etree.parse(PROFILE, parser=xml_parser)
 # Namespaces so query can be placed
 profile_nsmap = profile.getroot().nsmap
 # Query all rules
@@ -119,10 +128,10 @@ for rule in profile_rules:
             d[key] = val
     l.append(d)
 
-with open("defaults.json", "r") as f:
+with open(DEFAULTS, "r") as f:
     j = json.load(f)
 
-with open("report.html", "w") as f:
+with open(REPORT, "w") as f:
     f.write(head())
     f.write(body_start())
     for k, v in j.items():
@@ -132,5 +141,14 @@ with open("report.html", "w") as f:
                 ui_label = x["CDC UI Label"] if "CDC UI Label" in x else "n/a"
                 ctype = x["ElementType"] if "ElementType" in x else "n/a"
                 notes = x["Usage"] if "Usage" in x else "n/a"
-                f.write(table_row(xpath=k, value=v, constraint=constraint, ui_label=ui_label, ctype=ctype, notes=notes))
+                f.write(
+                    table_row(
+                        xpath=k,
+                        value=v,
+                        constraint=constraint,
+                        ui_label=ui_label,
+                        ctype=ctype,
+                        notes=notes,
+                    )
+                )
     f.write(body_end())
