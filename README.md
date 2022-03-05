@@ -1,21 +1,18 @@
 # Proxy for Dataverse OAI-MPH
 
-This script ensures [CESSDA's Data Catalogue](https://datacatalogue.cessda.eu/?publisher.publisher[0]=Austrian%20Social%20Science%20Data%20Archive%20%28AUSSDA%29) can request OAI files from AUSSDA's Dataverse. It ensures the files are in correct [DDI profile structure](https://cmv.cessda.eu/documentation/profiles.html).
+This script ensures [CESSDA's Data Catalogue](https://datacatalogue.cessda.eu/?publisher.publisher[0]=Austrian%20Social%20Science%20Data%20Archive%20%28AUSSDA%29) can request metadata from AUSSDA's Dataverse. It ensures the files are in correct [DDI profile structure](https://cmv.cessda.eu/documentation/profiles.html) so that data can be presented in [CESSDA's Datacatalogue](https://datacatalogue.cessda.eu/).
 
 
-Setup
------
+Dataverse exports its file metadata through [OAI exports](https://guides.dataverse.org/en/latest/admin/harvestserver.html). The proxy checks if elements (e.g. `nation`) and their attributes (e.g. `@abbr`) are present, and if they are not it adds default entries 
 
-The checks if paths or attributes are present. It adds default entries for any missing element in [Dataverse's OAI exports](https://guides.dataverse.org/en/latest/admin/harvestserver.html), and enables AUSSDA to be compliant with the constraints of the DDI profile defined by CESSDA. These are defined as [xpath](https://de.wikipedia.org/wiki/XPath) in the `assets/defaults.json` files.
+The proxy's configuration happens through `assets/defaults.json` and defined through [xpaths](https://de.wikipedia.org/wiki/XPath)). By default the proxy is setup to ensure the existence `mandatory` profile elements and attributes are present. **You have to populate the default file with paths and default values**. These values will be visible at the Data Catalogue. 
 
-The `assets/defaults.json` can be setup to fulfill the different constraint levels. By default the proxy is setup to ensure the existence of `mandatory` field. **You have to populate the file with paths and default values**. These values will be visible at the Data Catalogue. 
-
-Be aware that setting values on a dataset level is not possible. If there are multiple datasets missing the _abstract_ element, the proxy will set the same default value for all. You cannot define abstract `A` for one datafile and abstract `B` for another datafile.
+Be aware that setting specific metadata on a dataset is not possible. If there are multiple datasets missing the _abstract_ element, the proxy will set the same default value for all. You cannot define abstract `A` for one datafile and abstract `B` for another datafile, they will have the same abstract. 
 
 Generating defaults
 -------------------
 
-We also provide a a small script `assets/gen_defaults.py` that generates these files based on the DDI profile XML.
+We also provide a a small script `assets/gen_defaults.py` that generates these files based on the DDI profile XML. Please see [CESSDA's profile documentation](https://cmv.cessda.eu/profiles/cdc/ddi-2.5/1.0.4/profile-mono.xml) on how to populate these values.
 
 ```
 $ python3 assets/gen_defaults.py --help
@@ -93,7 +90,7 @@ We assume you have a running **Dataverse 4.20** or later and that you have **Pyt
     ``` bash
     sudo crontab -e
 
-    # Every day at 04:00 run the script. Output to logs
+    # Every day at 04:00 run the script.
     0 4 * * * /usr/bin/su - dataverse -c 'python3 /etc/dataverse/proxy/app/main.py'
     ```
 
@@ -102,11 +99,13 @@ Note that Dataverse [automatically generates metadata exports](https://guides.da
 Configuration page
 ------------------
 
-You can create a simple `html` page that shows the proxy's configuraton. Simply run
+You can create a simple `.html` page that shows the proxy's configuraton. Simply run:
 
 ``` bash
 python3 public/gen_report.py
 ```
+
+This could be added to a webserver. 
 
 
 Contribution and contact

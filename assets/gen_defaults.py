@@ -20,7 +20,9 @@ def gen_rules(
     """
 
     # Ensure that parameters are valid
-    assert all(True for c in constraint if c in ["Mandatory", "Optional", "Recommended"])
+    assert all(
+        True for c in constraint if c in ["Mandatory", "Optional", "Recommended"]
+    )
     assert path.isfile(profile)
 
     # Parse file as xml
