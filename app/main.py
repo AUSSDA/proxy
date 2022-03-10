@@ -216,24 +216,12 @@ def format_metadata(filename):
 def main():
     logging.info("Starting run")
 
-    # create backup folder if not exists, keep last 10 days
-    backups = Path(Path.cwd() / "backups/")
-    for d in backups.iterdir():
-        if ".gitkeep" not in d.name:
-            d_date = date.fromisoformat(d.name)
-            max_store = date.today() - timedelta(days=10)
-            if d_date < max_store:
-                logging.info("Removing backup older than 10 days %s", str(d))
-                shutil.rmtree(d)
-
     p = Path(FILE_ROOT)
     files = list(p.glob("**/export_oai_ddi.cached"))
+    # TODO Set back once deploy
     #    files = list(p.glob("**/domain1/files/**/export_oai_ddi.cached"))
     for filename in files:
         logging.info("Processng file %s", filename)
-        today = backups / str(date.today()) / filename.relative_to(filename.anchor)
-        today.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(filename, today)
         new = format_metadata(str(filename))
         if new is not None:
             with open(filename, "w") as f:
