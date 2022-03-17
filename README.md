@@ -99,16 +99,17 @@ Note that Dataverse [automatically generates metadata exports](https://guides.da
 Configuration page
 ------------------
 
-You can create a simple `.html` page that shows the proxy's configuraton. Simply run:
+You can create a simple, more user friendly `.html` page that shows the proxy's configuraton. Simply run:
 
 ``` bash
 python3 public/gen_report.py
 ```
 
-This could be added to a webserver. 
 
 
 Contribution and contact
 -------------------------
 
-We are happy for any pull requests! You can reach Archival Technologies at [AUSSDA](https://aussda.at)
+We are happy for any pull requests! 
+
+You can reach Archival Technologies at [AUSSDA](https://aussda.at)

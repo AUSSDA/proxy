@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
 
+"""
+Overall complexity: O(n²)
+
+Design choices:
+- Since all the mandatory elements and attribute contain a single piece of information, 
+  we only try to properly format one occurance of an element. If they are multiple occurances,
+  only the properly formatted one will be picked up by CESSDA anyway.
+
+- We do not want any of the information that has been set in Dataverse to be lost. 
+  So we nly add elements and attributes if they are missing, and do not override anything
+"""
+
 # ------------------------------------------------------------------------- #
 # Dependency imports
 # ------------------------------------------------------------------------- #
@@ -23,9 +35,8 @@ from lxml import etree
 fmt = "%(asctime)s::%(levelname)s::%(message)s"
 logging.basicConfig(filename="proxy.log", format=fmt, level=logging.DEBUG)
 
-# TODO (dmel): Set back to proper file root
-FILE_ROOT = "/home/daniel/Downloads"
-# FILE_ROOT = "/usr/local/payara5"  # default for payara5
+FILE_ROOT = "/usr/local/payara5"  # default for payara5
+DEFAULTS = "./assets/defaults.json"
 NSMAP = {
     "xlmns": "http://www.openarchives.org/OAI/2.0/",
     "ddi": "ddi:codebook:2_5",
@@ -61,7 +72,7 @@ def save_xml(xml, filename, indent=True):
 # ------------------------------------------------------------------------- #
 
 
-def gen_metadata_xpath(path: str):
+def gen_metadata_xpath(path):
     """Returns a properly formated xpath that lxml can read.
     Used as intermediate step to get an element in an xml
     from a specified rule in the defaults.json
@@ -95,7 +106,7 @@ def gen_metadata_xpath(path: str):
     return full.strip()
 
 
-def add_element_xpath(metadata: etree._Element, path: str):
+def add_element_xpath(metadata, path):
     """Creates a properly formated xpath that lxml can use.
     Used to create new elements in the XML file at the
     correct position.
@@ -115,21 +126,33 @@ def add_element_xpath(metadata: etree._Element, path: str):
         new = etree.SubElement(metadata.getroot(), new_el)
         return new
 
+def is_gfk(xml):
+    de = gen_metadata_xpath("/codeBook/stdyDscr/citation/distStmt/depositr")
+    da = gen_metadata_xpath("/codeBook/docDscr/citation/verStmt/version/@date")
 
-def attribute_rule(p, xml):
-    # Attribute rule, e.g. @abbr or @xml:lang
+    depositor = xml.xpath(de, namespaces=NSMAP)[0]
+    vdate = xml.xpath(da, namespaces=NSMAP)[0]
+    
+    if depositor.text == "Gfk Austria" and date.fromisoformat(vdate) < date.fromisoformat("2022-01-18"):
+        return True
+           
+
+
+def attribute_rule(p, value, xml):
+    # Ensure that last element is not a slash so that we can find element
+    path = path[:-1] if path[-1] == "/" else path
+   
+    # Separate attribute e.g. @abbr or @xml:lang from path
+    ns = None
     path, attrib = p.split("@")
     if ":" in attrib:
         # Attribute rule with namespace
         ns, attrib = attrib.split(":")
 
-    # Ensure that last element is not a slash so that we can find element
-    path = path[:-1] if path[-1] == "/" else path
-
-    # See if element exists, add if it doesnt
+    # Use first occurance if element exists, add if it does not
     el = xml.xpath(path, namespaces=NSMAP)
     if len(el) == 0:
-        logging.info('Adding element "%s"', rule)
+        logging.info("Adding element '%s'", rule)
         el = add_element_xpath(xml, path)
         logging.debug(path)
     else:
@@ -142,29 +165,38 @@ def attribute_rule(p, xml):
         if ns is not None:
             attrib = "{" + NSMAP[ns] + "}" + attrib
         # Set attribute with default value
-        logging.info('Attribute set to "%s" on "%s"', value, rule)
+        logging.info("Attribute set to '%s' on '%s'", value, rule)
         el.set(attrib, value)
     else:
-        logging.info('Attribute "%s" already present', rule)
+        logging.info("Attribute '%s' already present", rule)
 
 
-def element_rule(p, xml):
+    # Following are unique cases
+    if p == gen_metadata_xpath("/codeBook/@xml:lang") and is_gfk(xml):
+        el.set(attrib, "de")
+    if p == gen_metadata_xpath("/codeBook/stdyDscr/citation/holdings/@URI"):
+        val = xml.xpath(gen_metadata_xpath("/codeBook/docDscr/citation/titlStmt/IDNo", namespaces=NSMAP))[0]
+        url = "https://data.aussda.at/dataset.xhtml?persistentId=" + val
+        el.set(attrib, url)
+    if p == gen_metadata_xpath("/codeBook/stdyDscr/citation/distStmt/distDate/@date"):
+        val = xml.xpath(gen_metadata_xpath("codeBook/docDscr/citation/distStmt/distDate"), namespaces=NSMAP)[0]
+        el.set(attrib, val)
+
+def element_rule(p, value, xml):
     # Element rule, e.g. nation
     el = xml.xpath(p, namespaces=NSMAP)
     if len(el) == 0:  # element does not exist
         el = add_element_xpath(xml, path)
         logging.debug(path)
-        logging.info('Added element "%s"', rule)
-
-    # TODO Make two occurences of element possible
-    # TODO Fix bug where text is not added and requires rerun
-    for e in el:
-        # Keep text if exist, otherwise use default
-        if e.text == None:
-            e.text = value
-            logging.info('Adding text "%s" on "%s"', value, rule)
-        else:
-            logging.info('Element "%s" already set to "%s"', rule, e.text)
+        logging.info("Added element '%s'", rule)
+    else:
+        el = el[0]
+    
+    if e.text == None:
+        e.text = value
+        logging.info("Adding text '%s' on 's'", value, rule)
+    else:
+        logging.info("Element '%s' already set to '%s'", rule, e.text)
 
 
 def format_metadata(filename):
@@ -179,25 +211,17 @@ def format_metadata(filename):
     )
 
     try:
-        xml = etree.parse(filename, parser=xml_parser)
-        root_path, _ = os.path.split(os.path.dirname(os.path.realpath(__file__)))
-        defaults_filename = root_path + "/assets/defaults.json"
-        defaults = read_json_file(defaults_filename)
-
+        xml = etree.parse(filename, parser=xml_parser)    
+        defaults = read_json_file(DEFAULTS)
         # Iterate over paths and set default values if no value present
         for rule, value in defaults.items():
-            p, attrib, ns = None, None, None
-
-            # Adds xml namespaces so that lxml can find elemenst
-            p = gen_metadata_xpath(rule)
             # Verfiy element or attribute
+            p = gen_metadata_xpath(rule)
             if "@" in p:
-                attribute_rule(p, xml)
+                attribute_rule(p, value, xml)
             else:
-                element_rule(p, xml)
-
+                element_rule(p, value, xml)
         return pretty_xml(xml, indent=True)
-
     except etree.XMLSyntaxError:
         logging.error("XMLSyntaxError at %s", filename)
     except etree.XPathEvalError:
@@ -217,18 +241,15 @@ def main():
     logging.info("Starting run")
 
     p = Path(FILE_ROOT)
-    files = list(p.glob("**/export_oai_ddi.cached"))
-    # TODO Set back once deploy
-    #    files = list(p.glob("**/domain1/files/**/export_oai_ddi.cached"))
+    files = list(p.glob("**/domain1/files/**/export_oai_ddi.cached"))
     for filename in files:
         logging.info("Processng file %s", filename)
         new = format_metadata(str(filename))
         if new is not None:
             with open(filename, "w") as f:
                 f.write(new)
-
     logging.info("Done. Processed %s files.", len(files))
 
 
 if __name__ == "__main__":
-    main()
+     main()

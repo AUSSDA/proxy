@@ -71,6 +71,7 @@ def main(args) -> None:
         "-c",
         "--constraint",
         action="append",
+        default="Mandatory",
         help="Mandatory, recommended, optional constraint level",
     )
     p.add_argument(

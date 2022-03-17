@@ -10,8 +10,12 @@
   "/codeBook/stdyDscr/stdyInfo/abstract": "",
   "/codeBook/stdyDscr/stdyInfo/sumDscr/collDate/@event": "",
   "/codeBook/stdyDscr/stdyInfo/sumDscr/nation": "Austria",
-  "/codeBook/stdyDscr/stdyInfo/sumDscr/nation/@xml:lang": "de",
+  "/codeBook/stdyDscr/stdyInfo/sumDscr/nation/@xml:lang": "en",
   "/codeBook/stdyDscr/stdyInfo/sumDscr/nation/@abbr": "AT",
   "/codeBook/stdyDscr/dataAccs/useStmt/restrctn/@xml:lang": "en",
-  "/codeBook/stdyDscr/dataAccs/useStmt/restrctn": "For more Information please visit AUSSDA's web page"
+  "/codeBook/stdyDscr/dataAccs/useStmt/restrctn": "For more Information please visit AUSSDA's web page",
+  "/codeBook/stdyDscr/method/dataColl/sampProc/concept/@vocab": "DDI Sampling Procedure",
+  "/codeBook/stdyDscr/method/dataColl/sampProc/concept/@vocabURI": "https://vocabularies.cessda.eu/v2/vocabularies/SamplingProcedure/1.1?languageVersion=en-1.1",
+  "/codeBook/stdyDscr/method/dataColl/collMode/concept/@vocab": "DDI Mode of Collection",
+  "/codeBook/stdyDscr/method/dataColl/collMode/concept/@vocabURI": "https://vocabularies.cessda.eu/v2/vocabularies/ModeOfCollection/3.0?languageVersion=en-3.0"
 }
