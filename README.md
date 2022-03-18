@@ -5,7 +5,7 @@ This script ensures [CESSDA's Data Catalogue](https://datacatalogue.cessda.eu/?p
 
 Dataverse exports its file metadata through [OAI exports](https://guides.dataverse.org/en/latest/admin/harvestserver.html). The proxy checks if elements (e.g. `nation`) and their attributes (e.g. `@abbr`) are present, and if they are not it adds default entries 
 
-The proxy's configuration happens through `assets/defaults.json` and defined through [xpaths](https://de.wikipedia.org/wiki/XPath)). By default the proxy is setup to ensure the existence `mandatory` profile elements and attributes are present. **You have to populate the default file with paths and default values**. These values will be visible at the Data Catalogue. 
+The proxy's configuration happens through `assets/defaults.json` and defined through [xpaths](https://de.wikipedia.org/wiki/XPath)). By default the proxy is setup to ensure the existence `mandatory` profile elements and attributes are present. **You have to populate the default file with paths and default values**. These values will be visible at the Data Catalogue. The proxy also **puts the DOI links of the file in the correct element** so that they are visible in the datacatalogue.
 
 Be aware that setting specific metadata on a dataset is not possible. If there are multiple datasets missing the _abstract_ element, the proxy will set the same default value for all. You cannot define abstract `A` for one datafile and abstract `B` for another datafile, they will have the same abstract. 
 
@@ -94,7 +94,7 @@ We assume you have a running **Dataverse 4.20** or later and that you have **Pyt
     0 4 * * * /usr/bin/su - dataverse -c 'python3 /etc/dataverse/proxy/app/main.py'
     ```
 
-Note that Dataverse [automatically generates metadata exports](https://guides.dataverse.org/en/5.6/admin/metadataexport.html) daily, so we need to run the script daily as well.
+Note that Dataverse [automatically generates metadata exports](https://guides.dataverse.org/en/5.6/admin/metadataexport.html) daily, so we need to run the script daily as well. If you would like to **revert the changes**, you will need to delte all existing exports and request a `reExportAll`.
 
 Configuration page
 ------------------
