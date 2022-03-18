@@ -32,11 +32,15 @@ from lxml import etree
 # Globals / Defaults
 # ------------------------------------------------------------------------- #
 
+root = Path().cwd().parent 
+
 fmt = "%(asctime)s::%(levelname)s::%(message)s"
-logging.basicConfig(filename="/var/log/proxy.log", filemode="a", format=fmt, level=logging.DEBUG)
+logging.basicConfig(filename=root / "proxy.log", filemode="a", format=fmt, level=logging.DEBUG)
 
 FILE_ROOT = Path("/usr/local/payara5")  # default for payara5
-DEFAULTS = Path().cwd().parent / "assets/defaults.json"
+DEFAULTS = root / "assets/defaults.json"
+
+
 NSMAP = {
     "xlmns": "http://www.openarchives.org/OAI/2.0/",
     "ddi": "ddi:codebook:2_5",
