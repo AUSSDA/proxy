@@ -33,10 +33,10 @@ from lxml import etree
 # ------------------------------------------------------------------------- #
 
 fmt = "%(asctime)s::%(levelname)s::%(message)s"
-logging.basicConfig(filename="proxy.log", filemode="a", format=fmt, level=logging.DEBUG)
+logging.basicConfig(filename="/var/log/proxy.log", filemode="a", format=fmt, level=logging.DEBUG)
 
-FILE_ROOT = "/usr/local/payara5"  # default for payara5
-DEFAULTS = "./assets/defaults.json"
+FILE_ROOT = Path("/usr/local/payara5")  # default for payara5
+DEFAULTS = Path().cwd().parent / "assets/defaults.json"
 NSMAP = {
     "xlmns": "http://www.openarchives.org/OAI/2.0/",
     "ddi": "ddi:codebook:2_5",
@@ -218,7 +218,7 @@ def format_metadata(filename):
 
     try:
         xml = etree.parse(filename, parser=xml_parser)    
-        defaults = read_json_file(DEFAULTS)
+        defaults = read_json_file(str(DEFAULTS))
         # Iterate over paths and set default values if no value present
         for rule, value in defaults.items():
             # Verfiy element or attribute
@@ -245,7 +245,7 @@ def format_metadata(filename):
 
 def main():
     logging.info("Starting run")
-    files = list(Path(FILE_ROOT).glob("**/domain1/files/**/export_oai_ddi.cached"))
+    files = list(FILE_ROOT.glob("**/domain1/files/**/export_oai_ddi.cached"))
     for filename in files:
         logging.info("Processng file %s", filename)
         new = format_metadata(str(filename))
