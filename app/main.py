@@ -32,7 +32,7 @@ from lxml import etree
 # Globals / Defaults
 # ------------------------------------------------------------------------- #
 
-root = Path().cwd().parent 
+root = Path(__file__).parent 
 
 fmt = "%(asctime)s::%(levelname)s::%(message)s"
 logging.basicConfig(filename=root / "proxy.log", filemode="a", format=fmt, level=logging.DEBUG)
