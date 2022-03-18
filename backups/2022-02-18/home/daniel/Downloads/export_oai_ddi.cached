@@ -1,0 +1,164 @@
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>2022-02-17T09:37:36Z</responseDate>
+  <request verb="GetRecord" identifier="doi:10.11587/P5YJ0O" metadataPrefix="oai_ddi">https://data.aussda.at/oai</request>
+  <GetRecord>
+    <record>
+      <header>
+        <identifier>doi:10.11587/P5YJ0O</identifier>
+        <datestamp>2021-10-13T00:00:03Z</datestamp>
+        <setSpec>all_published</setSpec>
+      </header>
+      <metadata>
+        <codeBook xmlns="ddi:codebook:2_5" xsi:schemaLocation="ddi:codebook:2_5 https://ddialliance.org/Specification/DDI-Codebook/2.5/XMLSchema/codebook.xsd" version="2.5" xml:lang="de">
+          <docDscr>
+            <citation>
+              <titlStmt>
+                <titl xml:lang="de">Austrian Corona Panel Project (OA edition)</titl>
+                <IDNo agency="DOI">doi:10.11587/P5YJ0O</IDNo>
+              </titlStmt>
+              <distStmt>
+                <distrbtr source="archive">AUSSDA</distrbtr>
+                <distDate>2020-09-04</distDate>
+              </distStmt>
+              <verStmt source="archive">
+                <version date="2021-10-12" type="RELEASED">4</version>
+              </verStmt>
+              <biblCit>Kittel, Bernhard; Kritzinger, Sylvia; Boomgaarden, Hajo; Prainsack, Barbara; Eberl, Jakob-Moritz; Kalleitner, Fabian; Lebernegg, Noëlle S.; Partheymüller, Julia; Plescia, Carolina; Schiestl, David W.; Schlogl, Lukas, 2020, "Austrian Corona Panel Project (OA edition)", https://doi.org/10.11587/P5YJ0O, AUSSDA, V4, UNF:6:4EGij2bcZsu3GpsxWLa5/w== [fileUNF]</biblCit>
+            </citation>
+          </docDscr>
+          <stdyDscr>
+            <citation>
+              <titlStmt>
+                <titl xml:lang="de">Austrian Corona Panel Project (OA edition)</titl>
+                <IDNo agency="DOI" xml:lang="de">doi:10.11587/P5YJ0O</IDNo>
+                <parTitl xml:lang="de">Unavailable.</parTitl>
+                <parTitl xml:lang="de">Unavailable.</parTitl>
+              </titlStmt>
+              <rspStmt>
+                <AuthEnty affiliation="University of Vienna" xml:lang="de">Kittel, Bernhard</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Kritzinger, Sylvia</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Boomgaarden, Hajo</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Prainsack, Barbara</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Eberl, Jakob-Moritz</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Kalleitner, Fabian</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Lebernegg, Noëlle S.</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Partheymüller, Julia</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Plescia, Carolina</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Schiestl, David W.</AuthEnty>
+                <AuthEnty affiliation="University of Vienna">Schlogl, Lukas</AuthEnty>
+              </rspStmt>
+              <prodStmt>
+                <grantNo agency="Wiener Wissenschafts-, Forschungs- und Technologiefonds (WWTF)">EI-COV20-006</grantNo>
+                <grantNo agency="University of Vienna">n/a</grantNo>
+                <grantNo agency="FWF Austrian Science Fund">P33907</grantNo>
+                <grantNo agency="Austrian Social Survey (SSÖ)">n/a</grantNo>
+                <grantNo agency="Vienna Chamber of Labour (Arbeiterkammer Wien)">n/a</grantNo>
+                <grantNo agency="Federation of Austrian Industries (Industriellenvereinigung)">n/a</grantNo>
+              </prodStmt>
+              <distStmt>
+                <distrbtr source="archive" xml:lang="de" abbr="AUSSDA">AUSSDA</distrbtr>
+                <distrbtr>The Austrian Social Science Data Archive</distrbtr>
+                <contact affiliation="The Austrian Social Science Data Archive" email="info@aussda.at">AUSSDA</contact>
+                <depositr>University of Vienna</depositr>
+                <distDate date="1/1/1970">1/1/1970</distDate>
+                <distDate date="1/1/1970">1/1/1970</distDate>
+              </distStmt>
+              <holdings xml:lang="de" URI="https://aussda.at"/>
+              <holdings URI="https://aussda.at"/>
+            </citation>
+            <stdyInfo>
+              <subject>
+                <keyword xml:lang="de" vocab="Unavailable" vocabURI="Unavailable">Social Sciences</keyword>
+                <keyword vocab="ELSST">Economic activity</keyword>
+                <keyword vocab="ELSST">Conditions of employment</keyword>
+                <keyword vocab="ELSST">Income</keyword>
+                <keyword vocab="ELSST">Public health</keyword>
+                <keyword vocab="ELSST">Interpersonal relations</keyword>
+                <keyword vocab="ELSST">Emotional states</keyword>
+                <keyword vocab="ELSST">Trust in government</keyword>
+                <keyword vocab="ELSST">State control</keyword>
+                <keyword vocab="ELSST">COVID-19</keyword>
+                <keyword vocab="ELSST - The European Language Social Science Thesaurus" vocabURI="https://elsst.cessda.eu/id">Mass media use</keyword>
+                <topcClas vocab="CESSDA Topic Classification" xml:lang="de" vocabURI="Unavailable.">Public health</topcClas>
+                <topcClas vocab="CESSDA Topic Classification">Government, political systems and organisations</topcClas>
+                <topcClas vocab="CESSDA Topic Classification">Working conditions</topcClas>
+                <topcClas vocab="CESSDA Topic Classification" vocabURI="https://vocabularies.cessda.eu/vocabulary/TopicClassification">Employment</topcClas>
+              </subject>
+              <abstract xml:lang="de">Reduced edition for public use. Full edition available for scientific use. The corona crisis has fundamentally changed the everyday life in Austria as well as in many other countries. However, people are affected in very different ways. Against this background, the Corona Panel Study aims to provide an overview of various health, economic and social aspects of the corona crisis.</abstract>
+              <sumDscr>
+                <collDate cycle="P1" event="start" date="2020-03-27">2020-03-27</collDate>
+                <collDate cycle="P1" event="end" date="2021-07-02">2021-07-02</collDate>
+                <dataKind>Numeric</dataKind>
+                <nation xml:lang="de" abbr="Unavailable.">Austria</nation>
+                <anlyUnit xml:lang="de">Individual<concept vocab="Unavailable." vocabURI="Unavailable.">Unavailable.</concept><concept vocab="Unavailable.">Unavailable.</concept><concept vocabURI="Unavailable.">Unavailable.</concept></anlyUnit>
+                <universe>Austrian resident population from age 14</universe>
+              </sumDscr>
+              <notes>Version 4 (published on 2021-10-12) includes wave 1 to wave 24.&lt;br /&gt;Version 3 (published on 2021-06-24) includes wave 1 to wave 20.&lt;br /&gt;Version 2 (published on 2021-04-08) includes wave 1 to wave 15.&lt;br /&gt;Version 1 (published on 2020-09-04) includes wave 1 to wave 10.</notes>
+            </stdyInfo>
+            <method>
+              <dataColl>
+                <timeMeth xml:lang="de">Longitudinal: Panel<concept vocab="Unavailable." vocabURI="Unavailable.">Unavailable.</concept><concept vocab="Unavailable.">Unavailable.</concept><concept vocabURI="Unavailable.">Unavailable.</concept></timeMeth>
+                <sampProc xml:lang="de">Non-probability: Quota<concept vocab="Unavailable." vocabURI="Unavailable.">Unavailable.</concept><concept vocab="Unavailable.">Unavailable.</concept><concept vocabURI="Unavailable.">Unavailable.</concept></sampProc>
+                <sources>
+                  <dataSrc>Population group</dataSrc>
+                </sources>
+                <collMode xml:lang="de">Self-administered questionnaire: Web-based<concept vocab="Unavailable." vocabURI="Unavailable.">Unavailable.</concept><concept vocab="Unavailable.">Unavailable.</concept><concept vocabURI="Unavailable.">Unavailable.</concept></collMode>
+                <resInstru>Structured questionnaire</resInstru>
+              </dataColl>
+              <anlyInfo/>
+            </method>
+            <dataAccs>
+              <notes type="DVN:TOU" level="dv">&lt;a rel="license" href="https://creativecommons.org/licenses/by/4.0/deed.de"&gt;&lt;img alt="Creative Commons Lizenzvertrag" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /&gt;&lt;/a&gt;&lt;br /&gt;Dieses Werk ist lizenziert unter einer &lt;a rel="license" href="https://creativecommons.org/licenses/by/4.0/deed.de"&gt;Creative Commons Namensnennung 4.0 International Lizenz&lt;/a&gt;.&lt;/p&gt;
+
+&lt;a rel="license" href="http://creativecommons.org/licenses/by/4.0/"&gt;&lt;img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /&gt;&lt;/a&gt;&lt;br /&gt;This work is licensed under a &lt;a rel="license" href="http://creativecommons.org/licenses/by/4.0/"&gt;Creative Commons Attribution 4.0 International License&lt;/a&gt;.</notes>
+              <notes type="DVN:TOA" level="dv">By accessing the file you agree to the AUSSDA &lt;a href="https://aussda.at/en/terms-of-service/"&gt;Terms of Service&lt;/a&gt; and &lt;a href="https://aussda.at/en/privacy-policy/"&gt;Privacy Policy&lt;/a&gt;.</notes>
+              <setAvail/>
+              <useStmt>
+              </useStmt>
+            </dataAccs>
+            <othrStdyMat/>
+          </stdyDscr>
+          <otherMat ID="f5293" URI="https://data.aussda.at/api/access/datafile/5293" level="datafile">
+            <labl>10095_da_de_v4_0.tab</labl>
+            <txt>Core data file - STATA format - 4332 Variables, 3018 Observations</txt>
+            <notes level="file" type="DATAVERSE:CONTENTTYPE" subject="Content/MIME Type">text/tab-separated-values</notes>
+          </otherMat>
+          <otherMat ID="f5297" URI="https://data.aussda.at/api/access/datafile/5297" level="datafile">
+            <labl>10095_da_de_v4_0.zip</labl>
+            <txt>Core data file - compressed CSV format - 4332 Variables, 3018 Observations</txt>
+            <notes level="file" type="DATAVERSE:CONTENTTYPE" subject="Content/MIME Type">application/zip</notes>
+          </otherMat>
+          <otherMat ID="f5292" URI="https://data.aussda.at/api/access/datafile/5292" level="datafile">
+            <labl>10095_da_de_v4_0.zsav</labl>
+            <txt>Core data file - compressed SPSS format - 4332 Variables, 3018 Observations</txt>
+            <notes level="file" type="DATAVERSE:CONTENTTYPE" subject="Content/MIME Type">application/octet-stream</notes>
+          </otherMat>
+          <otherMat ID="f5298" URI="https://data.aussda.at/api/access/datafile/5298" level="datafile">
+            <labl>10095_mr_en_v4_0.pdf</labl>
+            <txt>Method Report - English</txt>
+            <notes level="file" type="DATAVERSE:CONTENTTYPE" subject="Content/MIME Type">application/pdf</notes>
+          </otherMat>
+          <otherMat ID="f5300" URI="https://data.aussda.at/api/access/datafile/5300" level="datafile">
+            <labl>10095_om_de_v4_0.zip</labl>
+            <txt>List of Variables</txt>
+            <notes level="file" type="DATAVERSE:CONTENTTYPE" subject="Content/MIME Type">application/zip</notes>
+          </otherMat>
+          <otherMat ID="f5299" URI="https://data.aussda.at/api/access/datafile/5299" level="datafile">
+            <labl>10095_qu_de_v4_0.pdf</labl>
+            <txt>Questionnaire</txt>
+            <notes level="file" type="DATAVERSE:CONTENTTYPE" subject="Content/MIME Type">application/pdf</notes>
+          </otherMat>
+          <otherMat ID="f5301" URI="https://data.aussda.at/api/access/datafile/5301" level="datafile">
+            <labl>10095_vi_de_v4_0.tab</labl>
+            <txt>Variable identifiers and descriptions - machine-readable</txt>
+            <notes level="file" type="DATAVERSE:CONTENTTYPE" subject="Content/MIME Type">text/tab-separated-values</notes>
+          </otherMat>
+          <fileName/>
+          <fileName xml:lang="de"/>
+          <fileName/>
+          <fileName xml:lang="de"/>
+        </codeBook>
+      </metadata>
+    </record>
+  </GetRecord>
+</OAI-PMH>

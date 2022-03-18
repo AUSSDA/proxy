@@ -1,6 +1,0 @@
-#!/bin/bash
-
-set -euo pipefail
-
-pipenv install >/dev/null
-pipenv run python3 app/main.py >> cron.log 2>&1

@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-Util functions.
-
-Mainly to generate the _default.json files. Run this as script.
-"""
-
 import argparse
 import json
 import sys
@@ -26,7 +20,9 @@ def gen_rules(
     """
 
     # Ensure that parameters are valid
-    assert constraint in ["Mandatory", "Optional", "Recommended"]
+    assert all(
+        True for c in constraint if c in ["Mandatory", "Optional", "Recommended"]
+    )
     assert path.isfile(profile)
 
     # Parse file as xml
@@ -46,8 +42,9 @@ def gen_rules(
     # Iterate over fields in rule, if constraint is there, return xpath
     for rule in profile_rules:
         for field in rule.itertext():
-            if f"Required: {constraint}" in field:
-                yield rule.attrib["xpath"]
+            for c in constraint:
+                if f"Required: {c}" in field:
+                    yield rule.attrib["xpath"]
 
 
 def gen_rules_defaults(
@@ -61,7 +58,7 @@ def gen_rules_defaults(
     for rule in gen_rules(constraint, profile):
         data[rule] = ""
 
-    filename = f"assets/{constraint.lower()}_defaults.json"
+    filename = "assets/defaults.json"
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=2)
 
@@ -70,12 +67,20 @@ def main(args) -> None:
     p = argparse.ArgumentParser(
         description="Creates a json file for each field/attribute per constraint level"
     )
-    p.add_argument("-c", "--constraint", type=str, default="Mandatory")
     p.add_argument(
-        "-p", "--profile", type=str, default="../assets/cdc25_profile_mono.xml"
+        "-c",
+        "--constraint",
+        action="append",
+        default="Mandatory",
+        help="Mandatory, recommended, optional constraint level",
+    )
+    p.add_argument(
+        "-p",
+        "--profile",
+        default="assets/cdc25_profile_mono.xml",
+        help="The location of the file to parse",
     )
     args = p.parse_args()
-
     gen_rules_defaults(constraint=args.constraint, profile=args.profile)
 
 
