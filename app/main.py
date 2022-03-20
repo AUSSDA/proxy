@@ -9,7 +9,7 @@ Design choices:
   only the properly formatted one will be picked up by CESSDA anyway.
 
 - We do not want any of the information that has been set in Dataverse to be lost. 
-  So we nly add elements and attributes if they are missing, and do not override anything
+  So we only add elements and attributes if they are missing, and do not override anything
 """
 
 # ------------------------------------------------------------------------- #
@@ -143,26 +143,14 @@ def is_gfk(xml):
     else:
         return False
            
-
-
-def attribute_rule(p, value, xml):
-    # Separate attribute e.g. @abbr or @xml:lang from path
-    ns = None
-    path, attrib = p.split("@")
-    # Ensure that last element is not a slash so that we can find element
-    path = path[:-1] if path[-1] == "/" else path
-    if ":" in attrib:
-        # Attribute rule with namespace
-        ns, attrib = attrib.split(":")
-
-    # Use first occurance if element exists, add if it does not
-    el = xml.xpath(path, namespaces=NSMAP)
-    if len(el) == 0:
-        logging.info('Element "%s" added' , p)
-        el = add_element_xpath(xml, path)
+def set_text(el, value, p):
+    if el.text == None:
+        el.text = value
+        logging.info('Element "%s" added text "%s"', p, value)
     else:
-        el = el[0]
+        logging.info('Element "%s" already set to "%s"', p, el.text)
 
+def set_attribute(el, attrib, ns, p, xml, value):
     # See if element contains attribute
     attrib_exists = any([attrib in a for a in el.attrib.keys()])
     if not attrib_exists:
@@ -193,20 +181,38 @@ def attribute_rule(p, value, xml):
         el.set(attrib, val.text)
         logging.info('Attribute "%s" set to "%s"', attrib, val.text)
 
+
+def attribute_rule(p, value, xml):
+    # Separate attribute e.g. @abbr or @xml:lang from path
+    ns = None
+    path, attrib = p.split("@")
+    # Ensure that last element is not a slash so that we can find element
+    path = path[:-1] if path[-1] == "/" else path
+    if ":" in attrib:
+        # Attribute rule with namespace
+        ns, attrib = attrib.split(":")
+
+    # Use first occurance if element exists, add if it does not
+    el = xml.xpath(path, namespaces=NSMAP)
+    if len(el) == 0:
+        logging.info('Element "%s" added' , p)
+        el = add_element_xpath(xml, path)
+        set_attribute(el, attrib, ns, p, xml, value)
+    else:
+        for e in el:
+            set_attribute(e, attrib, ns, p, xml, value)
+
+
 def element_rule(p, value, xml):
     # Element rule, e.g. nation
     el = xml.xpath(p, namespaces=NSMAP)
     if len(el) == 0:  # element does not exist
         el = add_element_xpath(xml, p)
         logging.info('Element "%s" added', p)
+        set_text(el, value, p)
     else:
-        el = el[0]
-    
-    if el.text == None:
-        el.text = value
-        logging.info('Element "%s" added text "%s"', p, value)
-    else:
-        logging.info('Element "%s" already set to "%s"', p, el.text)
+        for e in el:
+            set_text(e, value, p)
 
 
 def format_metadata(filename):
