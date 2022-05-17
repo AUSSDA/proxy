@@ -25,10 +25,9 @@ from lxml import etree
 root = Path(__file__).parent.parent
 
 fmt = "%(asctime)s::%(levelname)s::%(message)s"
-logging.basicConfig(filename=root / "proxy.log", filemode="a", format=fmt, level=logging.DEBUG)
+logging.basicConfig(filename=root / "proxy.log", filemode="a", format=fmt, level=logging.INFO)
 
-#FILE_ROOT = Path("/usr/local/payara5")  # default for payara5
-FILE_ROOT = Path("/home/daniel/Development/proxy/tests")
+FILE_ROOT = Path("/usr/local/payara5")  # default for payara5
 DEFAULTS = root / "assets/defaults.json"
 
 
@@ -220,18 +219,26 @@ def format_metadata(filename):
         encoding="utf-8",
     )
 
-    try:
-        xml = etree.parse(filename, parser=xml_parser)    
+    try: 
         defaults = read_json_file(str(DEFAULTS))
         # Iterate over paths and set default values if no value present
         for rule, value in defaults.items():
+            # Get current file
+            xml = etree.parse(filename, parser=xml_parser)   
+
             # Verfiy element or attribute
             p = gen_metadata_xpath(rule)
             if "@" in p:
                 attribute_rule(p, value, xml)
             else:
                 element_rule(p, value, xml)
-        return pretty_xml(xml, indent=True)
+
+            # Save to file on every change. Terribly inefficient. 
+            # TODO change to memory caching.
+            new = pretty_xml(xml, indent=True)
+            with open(filename, "w") as f:
+                f.write(new)
+
     except etree.XMLSyntaxError:
         logging.error("XMLSyntaxError at %s", filename)
     except etree.XPathEvalError:
@@ -249,14 +256,10 @@ def format_metadata(filename):
 
 def main():
     logging.info("Starting run")
-    files = list(FILE_ROOT.glob("**/export_oai_ddi.cached"))
-    #files = list(FILE_ROOT.glob("**/domain1/files/**/export_oai_ddi.cached"))
+    files = list(FILE_ROOT.glob("**/domain1/files/**/export_oai_ddi.cached"))
     for filename in files:
         logging.info("Processng file %s", filename)
-        new = format_metadata(str(filename))
-        if new is not None:
-            with open(filename, "w") as f:
-                f.write(new)
+        format_metadata(str(filename))
     logging.info("Done. Processed %s files.", len(files))
 
 
