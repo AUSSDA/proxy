@@ -140,7 +140,7 @@ def set_text(el, value, p):
     else:
         logging.debug('Element "%s" already set to "%s"', p, el.text)
 
-def set_attribute(el, attrib, ns, p, xml, value):
+def set_attribute(el, attrib, ns, p, xml, value, force=False):
     # See if element contains attribute
     attrib_exists = any([attrib in a for a in el.attrib.keys()])
     if not attrib_exists:
@@ -152,8 +152,13 @@ def set_attribute(el, attrib, ns, p, xml, value):
         el.set(attrib, value)
     else:
         v = [a for a in el.attrib if attrib in a][0]
-        val = el.attrib[v]
-        logging.debug('Attribute "%s" already present, set to "%s"', p, val)
+        if force:
+            val = el.attrib[v]
+            el.attrib[v] = value
+            logging.debug('Forced overwrite attribute on "%s" from "%s" set to "%s"', p, val, value)
+        else:
+            val = el.attrib[v]
+            logging.debug('Attribute "%s" already present, set to "%s"', p, val)
 
 
 def attribute_rule(p, value, xml):
@@ -174,8 +179,10 @@ def attribute_rule(p, value, xml):
         set_attribute(el, attrib, ns, p, xml, value)
     else:
         for e in el:
+            force = False
             if p == gen_metadata_xpath("/codeBook/@xml:lang") and is_gfk(xml):
                 value = "de"
+                force = True
                 logging.debug("Attribute value for GfK file")
             if p == gen_metadata_xpath("/codeBook/stdyDscr/citation/holdings/@URI"):
                 val = xml.xpath(gen_metadata_xpath("/codeBook/docDscr/citation/titlStmt/IDNo"), namespaces=NSMAP)[0]
@@ -193,7 +200,7 @@ def attribute_rule(p, value, xml):
                 value = iso_code if iso_code is not None else "ZZ"  # ZZ == unkown or unspecified country
                 logging.debug(f"Got nation abbrevation of nation '{val.text}' -> '{value}'")
 
-            set_attribute(e, attrib, ns, p, xml, value)
+            set_attribute(e, attrib, ns, p, xml, value, force)
 
 
 def element_rule(p, value, xml):
