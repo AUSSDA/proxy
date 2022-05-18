@@ -141,6 +141,31 @@ def set_text(el, value, p):
         logging.debug('Element "%s" already set to "%s"', p, el.text)
 
 def set_attribute(el, attrib, ns, p, xml, value, force=False):
+    # Special conditions
+    if p == gen_metadata_xpath("/codeBook/@xml:lang") and is_gfk(xml):
+        value = "de"
+        force = True
+        logging.debug("Attribute value for GfK file")
+    if p == gen_metadata_xpath("/codeBook/stdyDscr/stdyInfo/subject/keyword/@vocabURI"):
+        force = True
+        logging.debug("Override vocabURI")
+    if p == gen_metadata_xpath("/codeBook/stdyDscr/citation/holdings/@URI"):
+        val = xml.xpath(gen_metadata_xpath("/codeBook/docDscr/citation/titlStmt/IDNo"), namespaces=NSMAP)[0]
+        _, u = val.text.split(":")
+        url = "https://doi.org/" + u
+        value = url
+        logging.debug(f"Generated holdings URL '{value}'")
+    if p == gen_metadata_xpath("/codeBook/stdyDscr/citation/distStmt/distDate/@date"):
+        val = xml.xpath(gen_metadata_xpath("/codeBook/docDscr/citation/distStmt/distDate"), namespaces=NSMAP)[0]
+        value = val.text
+        logging.debug(f"Copied date '{value}' from distDate")
+    if p == gen_metadata_xpath("/codeBook/stdyDscr/stdyInfo/sumDscr/nation/@abbr"):
+        val = xml.xpath(gen_metadata_xpath("/codeBook/stdyDscr/stdyInfo/sumDscr/nation"), namespaces=NSMAP)[0]
+        iso_code = cc.get(val.text)
+        value = iso_code if iso_code is not None else "ZZ"  # ZZ == unkown or unspecified country
+        logging.debug(f"Got nation abbrevation of nation '{val.text}' -> '{value}'")
+
+
     # See if element contains attribute
     attrib_exists = any([attrib in a for a in el.attrib.keys()])
     if not attrib_exists:
@@ -158,7 +183,11 @@ def set_attribute(el, attrib, ns, p, xml, value, force=False):
             logging.debug('Forced overwrite attribute on "%s" from "%s" set to "%s"', p, val, value)
         else:
             val = el.attrib[v]
-            logging.debug('Attribute "%s" already present, set to "%s"', p, val)
+            if len(val) > 0:
+                logging.debug('Attribute "%s" already present, set to "%s"', p, val)
+            else:
+                el.attrib[v] = value
+                logging.debug('Attribute "%s" set to "%s"', p, value)
 
 
 def attribute_rule(p, value, xml):
@@ -179,28 +208,7 @@ def attribute_rule(p, value, xml):
         set_attribute(el, attrib, ns, p, xml, value)
     else:
         for e in el:
-            force = False
-            if p == gen_metadata_xpath("/codeBook/@xml:lang") and is_gfk(xml):
-                value = "de"
-                force = True
-                logging.debug("Attribute value for GfK file")
-            if p == gen_metadata_xpath("/codeBook/stdyDscr/citation/holdings/@URI"):
-                val = xml.xpath(gen_metadata_xpath("/codeBook/docDscr/citation/titlStmt/IDNo"), namespaces=NSMAP)[0]
-                _, u = val.text.split(":")
-                url = "https://doi.org/" + u
-                value = url
-                logging.debug("Generated holdings URL")
-            if p == gen_metadata_xpath("/codeBook/stdyDscr/citation/distStmt/distDate/@date"):
-                val = xml.xpath(gen_metadata_xpath("/codeBook/docDscr/citation/distStmt/distDate"), namespaces=NSMAP)[0]
-                value = val.text
-                logging.debug("Copied date from distDate")
-            if p == gen_metadata_xpath("/codeBook/stdyDscr/stdyInfo/sumDscr/nation/@abbr"):
-                val = xml.xpath(gen_metadata_xpath("/codeBook/stdyDscr/stdyInfo/sumDscr/nation"), namespaces=NSMAP)[0]
-                iso_code = cc.get(val.text)
-                value = iso_code if iso_code is not None else "ZZ"  # ZZ == unkown or unspecified country
-                logging.debug(f"Got nation abbrevation of nation '{val.text}' -> '{value}'")
-
-            set_attribute(e, attrib, ns, p, xml, value, force)
+            set_attribute(e, attrib, ns, p, xml, value)
 
 
 def element_rule(p, value, xml):
@@ -212,6 +220,11 @@ def element_rule(p, value, xml):
         set_text(el, value, p)
     else:
         for e in el:
+            s = gen_metadata_xpath("/codeBook/stdyDscr/stdyInfo/subject/keyword")
+            if e.text == "Social Sciences" and p == s:
+                logging.debug(f"Removed element at {e}")
+                e.getparent().remove(e) 
+
             set_text(e, value, p)
 
 
