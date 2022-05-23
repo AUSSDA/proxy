@@ -160,10 +160,10 @@ def set_attribute(el, attrib, ns, p, xml, value, force=False):
         value = val.text
         logging.debug(f"Copied date '{value}' from distDate")
     if p == gen_metadata_xpath("/codeBook/stdyDscr/stdyInfo/sumDscr/nation/@abbr"):
-        val = xml.xpath(gen_metadata_xpath("/codeBook/stdyDscr/stdyInfo/sumDscr/nation"), namespaces=NSMAP)[0]
-        iso_code = cc.get(val.text)
+        force = True
+        iso_code = cc.get(el.text)
         value = iso_code if iso_code is not None else "ZZ"  # ZZ == unkown or unspecified country
-        logging.debug(f"Got nation abbrevation of nation '{val.text}' -> '{value}'")
+        logging.debug(f"Got nation abbrevation of nation '{el.text}' -> '{value}'")
 
 
     # See if element contains attribute
@@ -276,7 +276,8 @@ def format_metadata(filename):
 
 def main():
     logging.info("Starting run")
-    files = list(FILE_ROOT.glob("**/domain1/files/**/export_oai_ddi.cached"))
+    files = list(Path("/home/daniel/Development/proxy/tests-christian").glob("**/export_oai_ddi.cached"))
+    #files = list(FILE_ROOT.glob("**/domain1/files/**/export_oai_ddi.cached"))
     for filename in files:
         logging.info("Processng file %s", filename)
         format_metadata(str(filename))

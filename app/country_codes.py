@@ -75,7 +75,7 @@ ISO3166 = {
 	'France': 'FR',
 	'France, Metropolitan': 'FX',
 	'Gabon': 'GA',
-	'United Kingdom (Great Britain)': 'GB',
+	'United Kingdom': 'GB',
 	'Grenada': 'GD',
 	'Georgia': 'GE',
 	'French Guiana': 'GF',
