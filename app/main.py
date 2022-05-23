@@ -276,8 +276,7 @@ def format_metadata(filename):
 
 def main():
     logging.info("Starting run")
-    files = list(Path("/home/daniel/Development/proxy/tests-christian").glob("**/export_oai_ddi.cached"))
-    #files = list(FILE_ROOT.glob("**/domain1/files/**/export_oai_ddi.cached"))
+    files = list(FILE_ROOT.glob("**/domain1/files/**/export_oai_ddi.cached"))
     for filename in files:
         logging.info("Processng file %s", filename)
         format_metadata(str(filename))
