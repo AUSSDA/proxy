@@ -27,7 +27,8 @@ root = Path(__file__).parent.parent
 fmt = "%(asctime)s::%(levelname)s::%(message)s"
 logging.basicConfig(filename=root / "proxy.log", filemode="a", format=fmt, level=logging.INFO)
 
-FILE_ROOT = Path("/usr/local/payara5")  # default for payara5
+FILE_ROOT = Path("/usr/local/payara6")  # default for payara6
+METADATA_ROOT = Path("/opt/data")  # path metadata files
 DEFAULTS = root / "assets/defaults.json"
 
 
@@ -276,7 +277,7 @@ def format_metadata(filename):
 
 def main():
     logging.info("Starting run")
-    files = list(FILE_ROOT.glob("**/domain1/files/**/export_oai_ddi.cached"))
+    files = list(METADATA_ROOT.glob("**/files/**/export_oai_ddi.cached"))
     for filename in files:
         logging.info("Processng file %s", filename)
         format_metadata(str(filename))
